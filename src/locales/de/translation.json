@@ -1,0 +1,219 @@
+{
+  "welcome": "Willkommen bei FitPlan",
+  "errors": {
+    "api": {
+      "missingKey": "API-Key nicht konfiguriert. Bitte VITE_MISTRAL_API_KEY in der .env-Datei setzen.",
+      "network": "Netzwerkfehler — Mistral API nicht erreichbar. Bitte Internetverbindung prüfen.",
+      "auth": "Ungültiger API-Key (401). Bitte VITE_MISTRAL_API_KEY überprüfen.",
+      "forbidden": "Zugriff verweigert (403). API-Key hat keine Berechtigung.",
+      "rateLimit": "API-Limit erreicht (429). Bitte kurz warten und erneut versuchen.",
+      "server": "Mistral-Server-Fehler (500). Bitte später erneut versuchen.",
+      "invalidResponse": "API-Antwort konnte nicht gelesen werden. Bitte erneut versuchen.",
+      "emptyResponse": "Leere Antwort von der Mistral API. Bitte erneut versuchen.",
+      "parseError": "Plan konnte nicht verarbeitet werden. Bitte erneut versuchen.",
+      "unknown": "Unbekannter Fehler. Bitte erneut versuchen."
+    }
+  },
+  "onboarding": {
+    "title": "Profil erstellen",
+    "step": "Schritt {{step}} von {{total}}",
+    "next": "Weiter",
+    "select": "Bitte wählen",
+    "optional": "optional",
+    "stepsUnit": "Schritte",
+    "sections": {
+      "body": "Körperliche Daten",
+      "activity": "Aktivität & Erfahrung",
+      "health": "Gesundheit"
+    },
+    "fields": {
+      "height": "Größe (cm)",
+      "weight": "Gewicht (kg)",
+      "age": "Alter",
+      "gender": "Geschlecht",
+      "goal": "Trainingsziel",
+      "bodyFat": "Körperfettanteil (%)",
+      "experience": "Trainingserfahrung",
+      "occupation": "Beruf / Aktivitätslevel",
+      "steps": "Tägliche Schritte",
+      "injuries": "Verletzungen / Einschränkungen",
+      "allergies": "Allergien / Unverträglichkeiten"
+    },
+    "gender": {
+      "male": "Männlich",
+      "female": "Weiblich",
+      "diverse": "Divers"
+    },
+    "goal": {
+      "muscle": "Muskelaufbau",
+      "lose": "Abnehmen",
+      "gain": "Gewichtszunahme",
+      "endurance": "Ausdauer",
+      "mobility": "Beweglichkeit",
+      "fitness": "Allgemeine Fitness"
+    },
+    "experience": {
+      "beginner": "Anfänger (< 1 Jahr)",
+      "intermediate": "Fortgeschritten (1–3 Jahre)",
+      "advanced": "Erfahren (3+ Jahre)"
+    },
+    "occupation": {
+      "desk": "Bürojob (wenig Bewegung)",
+      "standing": "Handwerk / Stehen (moderat)",
+      "heavy": "Körperlich schwer (sehr aktiv)"
+    },
+    "placeholders": {
+      "injuries": "z. B. Knieschmerzen, Rückenprobleme ...",
+      "allergies": "z. B. Laktose, Gluten ...",
+      "bodyFat": "z. B. 18"
+    },
+    "errors": {
+      "required": "Pflichtfeld",
+      "heightRange": "Muss zwischen 140 und 220 cm liegen",
+      "weightRange": "Muss zwischen 40 und 200 kg liegen",
+      "ageRange": "Muss zwischen 15 und 80 Jahren liegen",
+      "bodyFatRange": "Muss zwischen 5 und 60 % liegen"
+    }
+  },
+  "preferences": {
+    "title": "Präferenzen",
+    "step": "Schritt {{step}} von {{total}}",
+    "back": "Zurück",
+    "generate": "Plan generieren",
+    "generating": "Plan wird generiert ...",
+    "generatingTitle": "Dein Plan wird erstellt ...",
+    "generatingHint": "Mistral AI analysiert deine Daten und berechnet Kalorien, Makros und Trainingsplan. Das dauert ca. 30–60 Sekunden.",
+    "sections": {
+      "training": "Training",
+      "nutrition": "Ernährung",
+      "supplements": "Supplemente"
+    },
+    "fields": {
+      "trainingDays": "Trainingstage",
+      "gymType": "Fitnessstudio-Typ",
+      "trainingDuration": "Trainingszeit pro Einheit",
+      "trainingRegions": "Trainingsregionen pro Tag",
+      "nutritionBudget": "Ernährungsbudget",
+      "dietPreferences": "Essenspräferenzen",
+      "dislikedIngredients": "Unbeliebte Zutaten",
+      "supplements": "Supplemente",
+      "mealsPerDay": "Mahlzeiten pro Tag",
+      "mealTemperature": "Mahlzeiten-Temperatur"
+    },
+    "mealTemp": {
+      "warm": "Warm",
+      "cold": "Kalt",
+      "mixed": "Gemischt",
+      "warmHint": "Alle Mahlzeiten gekocht / warm",
+      "coldHint": "Keine Zubereitung / kein Kochen nötig",
+      "mixedHint": "Hauptmahlzeiten warm, Snacks kalt"
+    },
+    "placeholders": {
+      "dislikedIngredients": "z. B. Süßkartoffel, Fisch, Brokkoli ..."
+    },
+    "regions": {
+      "aiDecides": "KI entscheidet",
+      "manualToggle": "Selbst auswählen",
+      "aiHint": "Mistral wählt den optimalen Split basierend auf Ziel und Trainingstagen."
+    },
+    "muscle": {
+      "chest": "Brust",
+      "back": "Rücken",
+      "shoulders": "Schultern",
+      "arms": "Arme",
+      "legs": "Beine",
+      "core": "Core",
+      "fullbody": "Ganzkörper"
+    },
+    "days": {
+      "mon": "Mo",
+      "tue": "Di",
+      "wed": "Mi",
+      "thu": "Do",
+      "fri": "Fr",
+      "sat": "Sa",
+      "sun": "So"
+    },
+    "gymType": {
+      "chain": "McFit / Kette",
+      "chainSub": "Nur Geräte",
+      "standard": "Standard",
+      "standardSub": "Geräte + Freihantel",
+      "full": "Voll ausgestattet",
+      "fullSub": "Alles vorhanden"
+    },
+    "diet": {
+      "everything": "Alles",
+      "vegetarian": "Vegetarisch",
+      "vegan": "Vegan",
+      "lowcarb": "Low Carb",
+      "highprotein": "High Protein"
+    },
+    "supplement": {
+      "creatine": "Creatin",
+      "protein": "Protein Pulver",
+      "ashwagandha": "Ashwagandha",
+      "shilajit": "Shilajit",
+      "vitamins": "Vitamine",
+      "magnesium": "Magnesium",
+      "none": "Keine"
+    },
+    "meals": {
+      "2": "2×",
+      "3": "3×",
+      "4-5": "4–5×"
+    },
+    "unit": {
+      "min": "min",
+      "eurWeek": "€ / Woche"
+    },
+    "errors": {
+      "required": "Pflichtfeld",
+      "trainingDaysMin": "Mindestens 2 Tage wählen",
+      "dietRequired": "Mindestens eine Option wählen",
+      "unknown": "Unbekannter Fehler. Bitte erneut versuchen."
+    }
+  },
+  "plan": {
+    "title": "Dein Plan",
+    "subtitle": "FitPlan",
+    "noPlan": "Kein Plan vorhanden. Bitte zuerst das Profil ausfüllen.",
+    "langMismatch": "Dieser Plan wurde auf Englisch generiert — Inhalte (Übungen, Mahlzeiten) bleiben auf Englisch. Für einen deutschen Plan bitte neu generieren.",
+    "goToStart": "Zum Start",
+    "noData": "Keine Daten vorhanden",
+    "tips": "Allgemeine Tipps",
+    "sections": {
+      "training": "Training",
+      "nutrition": "Ernährung",
+      "supplements": "Supplemente"
+    },
+    "training": {
+      "sets": "Sätze",
+      "reps": "Wdh.",
+      "pause": "Pause",
+      "notePlaceholder": "Notiz (z. B. Gewicht: 40 kg)"
+    },
+    "nutrition": {
+      "calories": "Kalorien",
+      "protein": "Protein",
+      "carbs": "Kohlenhydrate",
+      "fat": "Fett",
+      "kcal": "kcal",
+      "breakfast": "Frühstück",
+      "lunch": "Mittagessen",
+      "dinner": "Abendessen"
+    },
+    "supplements": {
+      "supplement": "Supplement",
+      "timing": "Zeitpunkt",
+      "amount": "Menge",
+      "note": "Hinweis",
+      "none": "Keine Supplemente ausgewählt"
+    },
+    "actions": {
+      "regenerate": "Plan neu generieren",
+      "savePdf": "Als PDF speichern",
+      "pdfExporting": "PDF wird erstellt ..."
+    }
+  }
+}

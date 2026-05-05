@@ -1,0 +1,219 @@
+{
+  "welcome": "Welcome to FitPlan",
+  "errors": {
+    "api": {
+      "missingKey": "API key not configured. Please set VITE_MISTRAL_API_KEY in your .env file.",
+      "network": "Network error — Mistral API unreachable. Please check your internet connection.",
+      "auth": "Invalid API key (401). Please check VITE_MISTRAL_API_KEY.",
+      "forbidden": "Access denied (403). API key lacks permission.",
+      "rateLimit": "Rate limit reached (429). Please wait a moment and try again.",
+      "server": "Mistral server error (500). Please try again later.",
+      "invalidResponse": "Could not read API response. Please try again.",
+      "emptyResponse": "Empty response from Mistral API. Please try again.",
+      "parseError": "Could not process the plan. Please try again.",
+      "unknown": "Unknown error. Please try again."
+    }
+  },
+  "onboarding": {
+    "title": "Create Profile",
+    "step": "Step {{step}} of {{total}}",
+    "next": "Continue",
+    "select": "Please select",
+    "optional": "optional",
+    "stepsUnit": "steps",
+    "sections": {
+      "body": "Physical Data",
+      "activity": "Activity & Experience",
+      "health": "Health"
+    },
+    "fields": {
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "age": "Age",
+      "gender": "Gender",
+      "goal": "Training Goal",
+      "bodyFat": "Body Fat (%)",
+      "experience": "Training Experience",
+      "occupation": "Occupation / Activity Level",
+      "steps": "Daily Steps",
+      "injuries": "Injuries / Limitations",
+      "allergies": "Allergies / Intolerances"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "diverse": "Non-binary"
+    },
+    "goal": {
+      "muscle": "Build Muscle",
+      "lose": "Lose Weight",
+      "gain": "Gain Weight",
+      "endurance": "Endurance",
+      "mobility": "Mobility",
+      "fitness": "General Fitness"
+    },
+    "experience": {
+      "beginner": "Beginner (< 1 year)",
+      "intermediate": "Intermediate (1–3 years)",
+      "advanced": "Advanced (3+ years)"
+    },
+    "occupation": {
+      "desk": "Desk job (low activity)",
+      "standing": "Trade / Standing (moderate)",
+      "heavy": "Physically demanding (very active)"
+    },
+    "placeholders": {
+      "injuries": "e.g. knee pain, back problems ...",
+      "allergies": "e.g. lactose, gluten ...",
+      "bodyFat": "e.g. 18"
+    },
+    "errors": {
+      "required": "Required field",
+      "heightRange": "Must be between 140 and 220 cm",
+      "weightRange": "Must be between 40 and 200 kg",
+      "ageRange": "Must be between 15 and 80 years",
+      "bodyFatRange": "Must be between 5 and 60 %"
+    }
+  },
+  "preferences": {
+    "title": "Preferences",
+    "step": "Step {{step}} of {{total}}",
+    "back": "Back",
+    "generate": "Generate Plan",
+    "generating": "Generating plan ...",
+    "generatingTitle": "Creating your plan ...",
+    "generatingHint": "Mistral AI is analyzing your data and calculating calories, macros, and training plan. This takes about 30–60 seconds.",
+    "sections": {
+      "training": "Training",
+      "nutrition": "Nutrition",
+      "supplements": "Supplements"
+    },
+    "fields": {
+      "trainingDays": "Training Days",
+      "gymType": "Gym Type",
+      "trainingDuration": "Session Duration",
+      "trainingRegions": "Training Regions per Day",
+      "nutritionBudget": "Nutrition Budget",
+      "dietPreferences": "Diet Preferences",
+      "dislikedIngredients": "Disliked Ingredients",
+      "supplements": "Supplements",
+      "mealsPerDay": "Meals per Day",
+      "mealTemperature": "Meal Temperature"
+    },
+    "mealTemp": {
+      "warm": "Warm",
+      "cold": "Cold",
+      "mixed": "Mixed",
+      "warmHint": "All meals cooked / warm",
+      "coldHint": "No cooking required",
+      "mixedHint": "Main meals warm, snacks cold"
+    },
+    "placeholders": {
+      "dislikedIngredients": "e.g. sweet potato, fish, broccoli ..."
+    },
+    "regions": {
+      "aiDecides": "AI decides",
+      "manualToggle": "Choose manually",
+      "aiHint": "Mistral picks the optimal split based on your goal and training days."
+    },
+    "muscle": {
+      "chest": "Chest",
+      "back": "Back",
+      "shoulders": "Shoulders",
+      "arms": "Arms",
+      "legs": "Legs",
+      "core": "Core",
+      "fullbody": "Full Body"
+    },
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "gymType": {
+      "chain": "Chain Gym",
+      "chainSub": "Machines only",
+      "standard": "Standard",
+      "standardSub": "Machines + free weights",
+      "full": "Fully equipped",
+      "fullSub": "Everything available"
+    },
+    "diet": {
+      "everything": "Everything",
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "lowcarb": "Low Carb",
+      "highprotein": "High Protein"
+    },
+    "supplement": {
+      "creatine": "Creatine",
+      "protein": "Protein Powder",
+      "ashwagandha": "Ashwagandha",
+      "shilajit": "Shilajit",
+      "vitamins": "Vitamins",
+      "magnesium": "Magnesium",
+      "none": "None"
+    },
+    "meals": {
+      "2": "2×",
+      "3": "3×",
+      "4-5": "4–5×"
+    },
+    "unit": {
+      "min": "min",
+      "eurWeek": "€ / week"
+    },
+    "errors": {
+      "required": "Required field",
+      "trainingDaysMin": "Select at least 2 days",
+      "dietRequired": "Select at least one option",
+      "unknown": "Unknown error. Please try again."
+    }
+  },
+  "plan": {
+    "title": "Your Plan",
+    "subtitle": "FitPlan",
+    "noPlan": "No plan found. Please complete your profile first.",
+    "langMismatch": "This plan was generated in German — content (exercises, meals) stays in German. Regenerate to get an English plan.",
+    "goToStart": "Go to Start",
+    "noData": "No data available",
+    "tips": "General Tips",
+    "sections": {
+      "training": "Training",
+      "nutrition": "Nutrition",
+      "supplements": "Supplements"
+    },
+    "training": {
+      "sets": "Sets",
+      "reps": "Reps",
+      "pause": "Rest",
+      "notePlaceholder": "Note (e.g. Weight: 40 kg)"
+    },
+    "nutrition": {
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbohydrates",
+      "fat": "Fat",
+      "kcal": "kcal",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner"
+    },
+    "supplements": {
+      "supplement": "Supplement",
+      "timing": "Timing",
+      "amount": "Amount",
+      "note": "Note",
+      "none": "No supplements selected"
+    },
+    "actions": {
+      "regenerate": "Regenerate Plan",
+      "savePdf": "Save as PDF",
+      "pdfExporting": "Creating PDF ..."
+    }
+  }
+}
