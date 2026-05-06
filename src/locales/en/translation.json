@@ -185,7 +185,8 @@
     "sections": {
       "training": "Training",
       "nutrition": "Nutrition",
-      "supplements": "Supplements"
+      "supplements": "Supplements",
+      "notes": "Notes"
     },
     "training": {
       "sets": "Sets",
@@ -193,6 +194,36 @@
       "pause": "Rest",
       "exercises": "exercises",
       "notePlaceholder": "Note (e.g. Weight: 40 kg)"
+    },
+    "recipe": {
+      "steps": "Steps",
+      "expand": "Show recipe",
+      "collapse": "Hide recipe"
+    },
+    "shoppingList": {
+      "button": "Shopping list",
+      "title": "Shopping list",
+      "subtitle": "All ingredients for the week, combined",
+      "close": "Close",
+      "savePdf": "Save as PDF",
+      "exporting": "Creating PDF …",
+      "empty": "No ingredients found",
+      "categories": {
+        "protein": "Proteins",
+        "carbs": "Carbs",
+        "veggies": "Vegetables & Fruit",
+        "dairy": "Dairy",
+        "other": "Other"
+      }
+    },
+    "notes": {
+      "title": "My Notes",
+      "intro": "Capture your progress, thoughts, and observations.",
+      "placeholder": "How did this week go? Notes, observations, progress …",
+      "add": "Add note",
+      "empty": "No notes yet — write your first one!",
+      "delete": "Delete",
+      "charsLeft": "{{n}} characters left"
     },
     "headerBadges": {
       "kcalDay": "kcal / day",

@@ -28,6 +28,7 @@ export interface Mahlzeit {
   name: string
   kalorien: number
   zutaten: string[]
+  zubereitung?: string[]
 }
 
 export interface NutritionDay {
@@ -147,7 +148,7 @@ const JSON_SCHEMA = `{
       {
         "tag": "string",
         "mahlzeiten": [
-          { "typ": "string", "name": "string", "kalorien": number, "zutaten": ["string"] }
+          { "typ": "string", "name": "string", "kalorien": number, "zutaten": ["string"], "zubereitung": ["string"] }
         ]
       }
     ]
@@ -212,6 +213,12 @@ ZUTATEN-MENGEN (PFLICHT):
 - Jede Zutat im "zutaten"-Array MUSS eine konkrete Mengenangabe enthalten
 - PFLICHT-Format: "120g Hähnchenbrust", "2 Eier", "50g Haferflocken", "1 EL Olivenöl", "200ml Milch"
 - VERBOTEN: nur den Zutatennamen ohne Menge (z. B. "Hähnchenbrust", "Eier", "Olivenöl")
+
+ZUBEREITUNG (PFLICHT):
+- Jede Mahlzeit MUSS ein "zubereitung"-Array mit 4 bis 6 Schritten enthalten
+- Format: kurze, klare Anweisungen im Imperativ, OHNE Mengenangaben (Mengen stehen in "zutaten")
+- Beispiel: ["Eier in Schüssel verquirlen", "Pfanne mit Olivenöl erhitzen", "Eier 2 Minuten anbraten", "Spinat dazugeben und 1 Minute mitdünsten", "Mit Salz und Pfeffer abschmecken", "Auf Toast servieren"]
+- VERBOTEN: leeres Array, weniger als 4 oder mehr als 6 Schritte, ganze Sätze mit Mengen
 
 ÜBUNGS-NAMEN:
 - Konkrete Übung (z. B. "Schrägbankdrücken mit Kurzhanteln", "Klimmzüge am Latzug")
@@ -287,6 +294,12 @@ INGREDIENT QUANTITIES (REQUIRED):
 - Every ingredient in the "zutaten" array MUST include a concrete quantity
 - REQUIRED format: "120g chicken breast", "2 eggs", "50g oats", "1 tbsp olive oil", "200ml milk"
 - FORBIDDEN: ingredient name without quantity (e.g. "chicken breast", "eggs", "olive oil")
+
+COOKING STEPS (REQUIRED):
+- Every meal MUST contain a "zubereitung" array with 4 to 6 steps
+- Format: short, clear imperative instructions, WITHOUT quantities (quantities live in "zutaten")
+- Example: ["Whisk eggs in a bowl", "Heat olive oil in a pan", "Cook eggs for 2 minutes", "Add spinach and sauté for 1 minute", "Season with salt and pepper", "Serve on toast"]
+- FORBIDDEN: empty array, fewer than 4 or more than 6 steps, full sentences with quantities
 
 EXERCISE NAMES:
 - Specific exercise (e.g. "Incline Dumbbell Press", "Lat Pulldown", "Romanian Deadlift")

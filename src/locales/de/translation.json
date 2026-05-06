@@ -185,7 +185,8 @@
     "sections": {
       "training": "Training",
       "nutrition": "Ernährung",
-      "supplements": "Supplemente"
+      "supplements": "Supplemente",
+      "notes": "Notizen"
     },
     "training": {
       "sets": "Sätze",
@@ -193,6 +194,36 @@
       "pause": "Pause",
       "exercises": "Übungen",
       "notePlaceholder": "Notiz (z. B. Gewicht: 40 kg)"
+    },
+    "recipe": {
+      "steps": "Zubereitung",
+      "expand": "Rezept anzeigen",
+      "collapse": "Rezept verbergen"
+    },
+    "shoppingList": {
+      "button": "Einkaufsliste",
+      "title": "Einkaufsliste",
+      "subtitle": "Alle Zutaten der Woche zusammengefasst",
+      "close": "Schließen",
+      "savePdf": "Als PDF speichern",
+      "exporting": "PDF wird erstellt …",
+      "empty": "Keine Zutaten vorhanden",
+      "categories": {
+        "protein": "Proteine",
+        "carbs": "Kohlenhydrate",
+        "veggies": "Gemüse & Obst",
+        "dairy": "Milchprodukte",
+        "other": "Sonstiges"
+      }
+    },
+    "notes": {
+      "title": "Meine Notizen",
+      "intro": "Halte deinen Fortschritt, Gedanken oder Beobachtungen fest.",
+      "placeholder": "Wie lief diese Woche? Notizen, Beobachtungen, Fortschritt …",
+      "add": "Notiz hinzufügen",
+      "empty": "Noch keine Notizen — schreib deine erste!",
+      "delete": "Löschen",
+      "charsLeft": "{{n}} Zeichen übrig"
     },
     "headerBadges": {
       "kcalDay": "kcal / Tag",

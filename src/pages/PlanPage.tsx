@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { usePlan } from '../context/PlanContext'
 import { exportPDF } from '../utils/exportPDF'
 import type { FitnessPlan, Mahlzeit } from '../services/mistralService'
+import ShoppingListModal from '../components/ShoppingListModal'
+import NotesSection from '../components/NotesSection'
 
 // ── StatPill ──────────────────────────────────────────────────────────────────
 
@@ -59,10 +61,15 @@ function NoteInput({
 
 // ── MealCard ──────────────────────────────────────────────────────────────────
 
-function MealCard({ meal, label }: { meal: Mahlzeit; label: string }) {
+function MealCard({ meal, label, idx }: { meal: Mahlzeit; label: string; idx: number }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const hasSteps = (meal.zubereitung?.length ?? 0) > 0
+  const panelId = `recipe-panel-${idx}`
+
   return (
     <article className="bg-bg-card rounded-[22px] border border-amber/[0.15] px-5 py-5 flex flex-col gap-2">
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-baseline justify-between gap-3">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-amber">
           {label}
         </span>
@@ -81,6 +88,56 @@ function MealCard({ meal, label }: { meal: Mahlzeit; label: string }) {
           </span>
         ))}
       </div>
+
+      {hasSteps && (
+        <>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-controls={panelId}
+            className="mt-3 inline-flex items-center justify-center gap-2 self-start px-3.5 py-2 min-h-[36px] rounded-full border border-amber/[0.15] bg-amber/[0.06] text-amber text-xs font-semibold tracking-[0.06em] transition-colors hover:bg-amber/[0.10]"
+          >
+            <span>{open ? t('plan.recipe.collapse') : t('plan.recipe.expand')}</span>
+            <svg
+              viewBox="0 0 12 12"
+              className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M2 4l4 4 4-4" />
+            </svg>
+          </button>
+
+          <div
+            id={panelId}
+            className="grid transition-[grid-template-rows] duration-300 ease-out"
+            style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
+            aria-hidden={!open}
+          >
+            <div className="overflow-hidden min-h-0">
+              <div className="pt-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-fg-mute m-0 mb-2">
+                  {t('plan.recipe.steps')}
+                </p>
+                <ol className="flex flex-col gap-2 m-0 p-0 list-none">
+                  {(meal.zubereitung ?? []).map((step, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-fg-dim leading-relaxed">
+                      <span className="text-amber font-semibold tabular-nums w-5 flex-shrink-0 mt-0.5">
+                        {i + 1}.
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </article>
   )
 }
@@ -225,7 +282,15 @@ function TrainingSection({
 
 // ── NutritionSection ──────────────────────────────────────────────────────────
 
-function NutritionSection({ plan, isDe }: { plan: FitnessPlan; isDe: boolean }) {
+function NutritionSection({
+  plan,
+  isDe,
+  onOpenShoppingList,
+}: {
+  plan: FitnessPlan
+  isDe: boolean
+  onOpenShoppingList: () => void
+}) {
   const { t } = useTranslation()
   const [dayIdx, setDayIdx] = useState(0)
   const np = plan.ernaehrungsplan
@@ -234,6 +299,20 @@ function NutritionSection({ plan, isDe }: { plan: FitnessPlan; isDe: boolean }) 
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Shopping list trigger */}
+      <button
+        type="button"
+        onClick={onOpenShoppingList}
+        className="self-start inline-flex items-center gap-2 px-4 py-2.5 min-h-[40px] rounded-full border border-amber/30 bg-amber/[0.08] text-amber text-[13px] font-semibold transition-colors hover:bg-amber/[0.14]"
+      >
+        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M3 4h2l2.5 11h11l2-8H6" />
+          <circle cx="9" cy="19" r="1.5" />
+          <circle cx="17" cy="19" r="1.5" />
+        </svg>
+        {t('plan.shoppingList.button')}
+      </button>
+
       {/* Macro grid */}
       <div className="grid grid-cols-2 gap-2.5">
         <MacroCard kind="cal" label={t('plan.nutrition.calories')} value={np.kalorien_ziel} unit="kcal" isDe={isDe} />
@@ -263,7 +342,7 @@ function NutritionSection({ plan, isDe }: { plan: FitnessPlan; isDe: boolean }) 
       {day ? (
         <div className="flex flex-col gap-2.5">
           {day.mahlzeiten.map((meal, i) => (
-            <MealCard key={i} meal={meal} label={meal.typ} />
+            <MealCard key={`${dayIdx}-${i}`} idx={dayIdx * 100 + i} meal={meal} label={meal.typ} />
           ))}
         </div>
       ) : (
@@ -320,8 +399,8 @@ function SupplementSection({ plan }: { plan: FitnessPlan }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-type Section = 'training' | 'nutrition' | 'supplements'
-const SECTIONS: Section[] = ['training', 'nutrition', 'supplements']
+type Section = 'training' | 'nutrition' | 'supplements' | 'notes'
+const SECTIONS: Section[] = ['training', 'nutrition', 'supplements', 'notes']
 
 export default function PlanPage() {
   const { plan, planLang } = usePlan()
@@ -330,6 +409,7 @@ export default function PlanPage() {
   const [section, setSection] = useState<Section>('training')
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [shoppingOpen, setShoppingOpen] = useState(false)
 
   async function handleExportPDF() {
     if (!plan) return
@@ -478,11 +558,18 @@ export default function PlanPage() {
           {section === 'training' && (
             <TrainingSection plan={plan} notes={notes} setNotes={setNotes} />
           )}
-          {section === 'nutrition' && <NutritionSection plan={plan} isDe={isDe} />}
+          {section === 'nutrition' && (
+            <NutritionSection
+              plan={plan}
+              isDe={isDe}
+              onOpenShoppingList={() => setShoppingOpen(true)}
+            />
+          )}
           {section === 'supplements' && <SupplementSection plan={plan} />}
+          {section === 'notes' && <NotesSection lang={isDe ? 'de' : 'en'} />}
 
           {/* General tips */}
-          {(plan.allgemeine_tipps?.length ?? 0) > 0 && (
+          {section !== 'notes' && (plan.allgemeine_tipps?.length ?? 0) > 0 && (
             <div className="mt-4 bg-bg-card rounded-[22px] border border-amber/[0.15] p-5 flex flex-col gap-3">
               <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-mute m-0">
                 {t('plan.tips')}
@@ -538,6 +625,14 @@ export default function PlanPage() {
           )}
         </button>
       </div>
+
+      {shoppingOpen && (
+        <ShoppingListModal
+          plan={plan}
+          lang={isDe ? 'de' : 'en'}
+          onClose={() => setShoppingOpen(false)}
+        />
+      )}
     </div>
   )
 }

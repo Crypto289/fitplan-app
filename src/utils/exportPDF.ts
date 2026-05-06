@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf'
 import type { FitnessPlan } from '../services/mistralService'
+import { aggregateIngredients, CATEGORY_ORDER, type IngredientCategory } from './aggregateIngredients'
 
 // ── Layout ────────────────────────────────────────────────────────────────────
 
@@ -311,4 +312,119 @@ export async function exportPDF(plan: FitnessPlan, lang: 'de' | 'en' = 'de'): Pr
   // ── Save ──────────────────────────────────────────────────────────────────
 
   pdf.save(`fitplan-${new Date().toISOString().slice(0, 10)}.pdf`)
+}
+
+// ── Shopping list export ─────────────────────────────────────────────────────
+
+function getShoppingLabels(lang: 'de' | 'en') {
+  return lang === 'de'
+    ? {
+        title: 'FitPlan — Einkaufsliste',
+        created: 'Erstellt am',
+        empty: 'Keine Zutaten vorhanden',
+        cats: {
+          protein: 'Proteine',
+          carbs: 'Kohlenhydrate',
+          veggies: 'Gemüse & Obst',
+          dairy: 'Milchprodukte',
+          other: 'Sonstiges',
+        } as Record<IngredientCategory, string>,
+      }
+    : {
+        title: 'FitPlan — Shopping List',
+        created: 'Created on',
+        empty: 'No ingredients found',
+        cats: {
+          protein: 'Proteins',
+          carbs: 'Carbs',
+          veggies: 'Vegetables & Fruit',
+          dairy: 'Dairy',
+          other: 'Other',
+        } as Record<IngredientCategory, string>,
+      }
+}
+
+export async function exportShoppingList(plan: FitnessPlan, lang: 'de' | 'en' = 'de'): Promise<void> {
+  const lbl = getShoppingLabels(lang)
+  const grouped = aggregateIngredients(plan)
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+
+  let y = MT
+
+  function newPage() { pdf.addPage(); y = MT }
+  function gap(n: number) { y += n }
+  function check(need: number) { if (y + need > PH - MB) newPage() }
+  function F(style: 'bold' | 'normal' | 'italic', size: number) {
+    pdf.setFont('helvetica', style)
+    pdf.setFontSize(size)
+  }
+  function TC(r: number, g: number, b: number) { pdf.setTextColor(r, g, b) }
+  function DC(r: number, g: number, b: number) { pdf.setDrawColor(r, g, b) }
+  function LW(w: number) { pdf.setLineWidth(w) }
+  function T(text: string, x: number, opts?: { align?: 'left' | 'center' | 'right' }) {
+    pdf.text(text, x, y, opts)
+  }
+  function HL(x1 = ML, x2 = PW - ML) { pdf.line(x1, y, x2, y) }
+
+  // Document header
+  F('bold', 18); TC(10, 10, 10)
+  T(lbl.title, ML)
+  gap(7)
+
+  F('normal', 9); TC(120, 120, 120)
+  T(`${lbl.created}: ${new Date().toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB')}`, ML)
+  gap(4.5)
+
+  LW(0.5); DC(232, 146, 42); HL()
+  gap(10)
+
+  // Empty state
+  const totalItems = CATEGORY_ORDER.reduce((sum, c) => sum + grouped[c].length, 0)
+  if (totalItems === 0) {
+    F('italic', 11); TC(120, 120, 120)
+    T(lbl.empty, ML)
+    pdf.save(`einkaufsliste-${new Date().toISOString().slice(0, 10)}.pdf`)
+    return
+  }
+
+  let secNum = 1
+  function sectionHeader(title: string) {
+    check(16)
+    const num = String(secNum++).padStart(2, '0')
+    F('bold', 9); TC(232, 146, 42)
+    T(num, ML)
+    TC(15, 15, 15)
+    T(title.toUpperCase(), ML + 9)
+    gap(4)
+    LW(0.3); DC(205, 205, 205); HL()
+    gap(7)
+  }
+
+  // Two-column item layout
+  const COL_W = (CW - 6) / 2
+  const COL_X = [ML, ML + COL_W + 6]
+  const ROW_H = 6
+
+  for (const cat of CATEGORY_ORDER) {
+    const items = grouped[cat]
+    if (items.length === 0) continue
+
+    sectionHeader(lbl.cats[cat])
+
+    // Pair items across two columns
+    for (let i = 0; i < items.length; i += 2) {
+      check(ROW_H)
+      const left = items[i]
+      const right = items[i + 1]
+
+      F('normal', 10); TC(35, 35, 35)
+      T(`•  ${left.display}`, COL_X[0])
+      if (right) T(`•  ${right.display}`, COL_X[1])
+      gap(ROW_H)
+    }
+
+    gap(4)
+  }
+
+  pdf.save(`einkaufsliste-${new Date().toISOString().slice(0, 10)}.pdf`)
 }
