@@ -191,7 +191,12 @@
       "sets": "Sets",
       "reps": "Reps",
       "pause": "Rest",
+      "exercises": "exercises",
       "notePlaceholder": "Note (e.g. Weight: 40 kg)"
+    },
+    "headerBadges": {
+      "kcalDay": "kcal / day",
+      "trainingWeek": "training / week"
     },
     "nutrition": {
       "calories": "Calories",

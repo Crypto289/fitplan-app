@@ -7,11 +7,28 @@ import type { FitnessPlan, Mahlzeit } from '../services/mistralService'
 
 // ── StatPill ──────────────────────────────────────────────────────────────────
 
-function StatPill({ label, value }: { label: string; value: string }) {
+function StatPill({
+  label,
+  value,
+  unit,
+}: {
+  label: string
+  value: string | number
+  unit?: string
+}) {
   return (
-    <div className="flex flex-col items-center bg-[#0d1018] rounded-xl px-3 py-2.5 flex-1 border border-white/[0.05]">
-      <span className="text-[10px] text-white/30 uppercase tracking-wider">{label}</span>
-      <span className="text-sm font-bold text-white mt-0.5 tabular-nums">{value}</span>
+    <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl px-3 py-3 text-center">
+      <div className="text-[9.5px] font-semibold uppercase tracking-[0.22em] text-fg-mute mb-1.5">
+        {label}
+      </div>
+      <div className="text-[22px] font-bold tracking-[-0.01em] tabular-nums text-fg leading-none">
+        {value}
+        {unit && (
+          <span className="text-[11px] font-medium text-fg-mute ml-0.5 tracking-[0.04em]">
+            {unit}
+          </span>
+        )}
+      </div>
     </div>
   )
 }
@@ -35,7 +52,7 @@ function NoteInput({
       placeholder={placeholder}
       value={notes[noteKey] ?? ''}
       onChange={(e) => setNotes((prev) => ({ ...prev, [noteKey]: e.target.value }))}
-      className="w-full bg-transparent border-b border-white/[0.07] text-xs text-white/55 placeholder:text-white/20 py-2 focus:outline-none focus:border-neon/40 transition-colors"
+      className="w-full bg-transparent border-b border-white/[0.07] text-xs text-fg-dim placeholder:text-fg-mute py-2 focus:outline-none focus:border-amber/60 transition-colors"
     />
   )
 }
@@ -44,20 +61,73 @@ function NoteInput({
 
 function MealCard({ meal, label }: { meal: Mahlzeit; label: string }) {
   return (
-    <div className="bg-[#0d1018] rounded-xl border border-white/[0.06] p-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-neon/55 uppercase tracking-wider">{label}</span>
-        <span className="text-xs font-mono text-white/30">{meal.kalorien} kcal</span>
+    <article className="bg-bg-card rounded-[22px] border border-amber/[0.15] px-5 py-5 flex flex-col gap-2">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-amber">
+          {label}
+        </span>
+        <span className="text-xs font-medium tabular-nums text-fg-dim">
+          {meal.kalorien} kcal
+        </span>
       </div>
-      <p className="text-sm font-semibold text-white">{meal.name}</p>
-      <ul className="flex flex-col gap-1.5">
+      <h3 className="text-[17px] font-bold tracking-[-0.01em] text-fg m-0">{meal.name}</h3>
+      <div className="flex flex-wrap gap-1.5 mt-1">
         {meal.zutaten.map((z, i) => (
-          <li key={i} className="text-xs text-white/40 flex items-center gap-2.5">
-            <span className="w-1 h-1 rounded-full bg-neon/35 flex-shrink-0" />
+          <span
+            key={i}
+            className="text-xs bg-white/[0.025] border border-white/[0.06] px-2.5 py-1 rounded-full text-fg-dim"
+          >
             {z}
-          </li>
+          </span>
         ))}
-      </ul>
+      </div>
+    </article>
+  )
+}
+
+// ── Macro card ────────────────────────────────────────────────────────────────
+
+type MacroKey = 'cal' | 'pro' | 'carb' | 'fat'
+
+const MACRO_STYLE: Record<MacroKey, { color: string; barFrom: string; barTo: string; glow: string }> = {
+  cal: { color: '#e8922a', barFrom: '#b8701f', barTo: '#f0a648', glow: '0 0 10px rgba(232,146,42,0.55)' },
+  pro: { color: '#6aa9ff', barFrom: '#4a85d9', barTo: '#6aa9ff', glow: '0 0 8px rgba(106,169,255,0.35)' },
+  carb: { color: '#d4b450', barFrom: '#b89640', barTo: '#d4b450', glow: '0 0 8px rgba(212,180,80,0.35)' },
+  fat: { color: '#d96a3a', barFrom: '#b04e22', barTo: '#d96a3a', glow: '0 0 8px rgba(217,106,58,0.35)' },
+}
+
+function MacroCard({
+  kind,
+  label,
+  value,
+  unit,
+  isDe,
+}: {
+  kind: MacroKey
+  label: string
+  value: number
+  unit: string
+  isDe: boolean
+}) {
+  const s = MACRO_STYLE[kind]
+  const borderClr = kind === 'cal' ? 'rgba(232,146,42,0.30)' : 'rgba(232,146,42,0.15)'
+  return (
+    <div
+      className="bg-bg-card rounded-[18px] p-5 border"
+      style={{ borderColor: borderClr }}
+    >
+      <div className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-fg-mute mb-2.5">
+        {label}
+      </div>
+      <div>
+        <span
+          className="text-[42px] font-bold tracking-[-0.03em] tabular-nums leading-none"
+          style={{ color: s.color }}
+        >
+          {value.toLocaleString(isDe ? 'de-DE' : 'en-US')}
+        </span>
+        <span className="text-xs font-medium text-fg-mute ml-1.5 tracking-[0.06em]">{unit}</span>
+      </div>
     </div>
   )
 }
@@ -79,21 +149,21 @@ function TrainingSection({
   const day = days[dayIdx]
 
   if (!day) {
-    return <p className="text-white/25 text-sm text-center py-16">{t('plan.noData')}</p>
+    return <p className="text-fg-mute text-sm text-center py-16">{t('plan.noData')}</p>
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {/* Day tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-1 px-7 -mx-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {days.map((d, i) => (
           <button
             key={i}
             onClick={() => setDayIdx(i)}
-            className={`flex-shrink-0 px-5 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+            className={`flex-shrink-0 px-4 py-2.5 min-h-[40px] rounded-full border text-[13px] font-medium transition-all ${
               dayIdx === i
-                ? 'border-neon/60 bg-neon/10 text-neon shadow-[0_0_14px_rgba(0,255,136,0.18)]'
-                : 'border-white/[0.07] bg-[#0d1018] text-white/40 hover:border-neon/20 hover:text-white/70'
+                ? 'border-amber bg-amber/[0.15] text-amber'
+                : 'border-white/[0.06] bg-white/[0.02] text-fg-dim hover:text-fg'
             }`}
           >
             {d.tag}
@@ -101,34 +171,44 @@ function TrainingSection({
         ))}
       </div>
 
-      {/* Focus divider */}
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-neon/[0.12]" />
-        <span className="text-[10px] font-bold text-neon/50 uppercase tracking-[0.18em] px-2">
-          {day.focus}
+      {/* Focus row */}
+      <div className="flex items-baseline gap-3 flex-wrap mt-3 mb-1">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber">
+          ▸ {day.focus}
         </span>
-        <div className="h-px flex-1 bg-neon/[0.12]" />
+        <span className="text-xs text-fg-mute tracking-[0.06em]">
+          · {day.uebungen.length} {t('plan.training.exercises')}
+        </span>
       </div>
 
       {/* Exercise cards */}
       {day.uebungen.map((ex, exIdx) => (
-        <div
+        <article
           key={exIdx}
-          className="bg-[#1a1d27] rounded-2xl border border-neon/[0.08] p-4 sm:p-5 flex flex-col gap-4 shadow-card"
+          className="relative bg-bg-card rounded-[22px] border border-amber/[0.15] p-5 flex flex-col gap-4"
         >
-          <div className="flex flex-col gap-1">
-            <p className="text-base font-bold text-white">{ex.name}</p>
-            <span className="text-xs text-neon/50 font-medium">{ex.maschine}</span>
+          {/* Number badge */}
+          <span
+            className="absolute top-[18px] right-[18px] bg-amber/10 border border-amber/30 text-amber text-[11px] font-bold tracking-[0.12em] tabular-nums px-2.5 py-1 rounded-lg"
+          >
+            {String(exIdx + 1).padStart(2, '0')} / {String(day.uebungen.length).padStart(2, '0')}
+          </span>
+
+          <div className="flex flex-col gap-1 pr-16">
+            <h3 className="text-[19px] font-bold tracking-[-0.01em] text-fg m-0">{ex.name}</h3>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber">
+              {ex.maschine}
+            </span>
           </div>
 
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <StatPill label={t('plan.training.sets')} value={String(ex.sets)} />
             <StatPill label={t('plan.training.reps')} value={ex.wiederholungen} />
             <StatPill label={t('plan.training.pause')} value={ex.pause} />
           </div>
 
           {ex.beschreibung && (
-            <p className="text-xs text-white/38 leading-relaxed">{ex.beschreibung}</p>
+            <p className="text-[13px] text-fg-dim leading-relaxed m-0">{ex.beschreibung}</p>
           )}
 
           <NoteInput
@@ -137,7 +217,7 @@ function TrainingSection({
             setNotes={setNotes}
             placeholder={t('plan.training.notePlaceholder')}
           />
-        </div>
+        </article>
       ))}
     </div>
   )
@@ -145,45 +225,33 @@ function TrainingSection({
 
 // ── NutritionSection ──────────────────────────────────────────────────────────
 
-function NutritionSection({ plan }: { plan: FitnessPlan }) {
+function NutritionSection({ plan, isDe }: { plan: FitnessPlan; isDe: boolean }) {
   const { t } = useTranslation()
   const [dayIdx, setDayIdx] = useState(0)
   const np = plan.ernaehrungsplan
   const days = np.wochentage
   const day = days[dayIdx]
 
-  const macros = [
-    { label: t('plan.nutrition.calories'), value: np.kalorien_ziel, unit: 'kcal', cls: 'text-neon' },
-    { label: t('plan.nutrition.protein'), value: np.protein_g, unit: 'g', cls: 'text-blue-400' },
-    { label: t('plan.nutrition.carbs'), value: np.kohlenhydrate_g, unit: 'g', cls: 'text-amber-400' },
-    { label: t('plan.nutrition.fat'), value: np.fett_g, unit: 'g', cls: 'text-orange-400' },
-  ]
-
   return (
     <div className="flex flex-col gap-4">
       {/* Macro grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {macros.map(({ label, value, unit, cls }) => (
-          <div key={label} className="bg-[#1a1d27] rounded-xl border border-white/[0.06] p-4 text-center">
-            <p className="text-[10px] text-white/35 uppercase tracking-wider mb-1">{label}</p>
-            <p className={`text-2xl font-bold ${cls}`}>
-              {value}
-              <span className="text-xs font-normal ml-1 opacity-55">{unit}</span>
-            </p>
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-2.5">
+        <MacroCard kind="cal" label={t('plan.nutrition.calories')} value={np.kalorien_ziel} unit="kcal" isDe={isDe} />
+        <MacroCard kind="pro" label={t('plan.nutrition.protein')} value={np.protein_g} unit="g" isDe={isDe} />
+        <MacroCard kind="carb" label={t('plan.nutrition.carbs')} value={np.kohlenhydrate_g} unit="g" isDe={isDe} />
+        <MacroCard kind="fat" label={t('plan.nutrition.fat')} value={np.fett_g} unit="g" isDe={isDe} />
       </div>
 
       {/* Day tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-1 px-7 -mx-7 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {days.map((d, i) => (
           <button
             key={i}
             onClick={() => setDayIdx(i)}
-            className={`flex-shrink-0 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+            className={`flex-shrink-0 px-4 py-2.5 min-h-[40px] rounded-full border text-[13px] font-medium transition-all ${
               dayIdx === i
-                ? 'border-neon/60 bg-neon/10 text-neon shadow-[0_0_14px_rgba(0,255,136,0.18)]'
-                : 'border-white/[0.07] bg-[#0d1018] text-white/40 hover:border-neon/20 hover:text-white/70'
+                ? 'border-amber bg-amber/[0.15] text-amber'
+                : 'border-white/[0.06] bg-white/[0.02] text-fg-dim hover:text-fg'
             }`}
           >
             {d.tag}
@@ -193,13 +261,13 @@ function NutritionSection({ plan }: { plan: FitnessPlan }) {
 
       {/* Meals */}
       {day ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2.5">
           {day.mahlzeiten.map((meal, i) => (
             <MealCard key={i} meal={meal} label={meal.typ} />
           ))}
         </div>
       ) : (
-        <p className="text-white/25 text-sm text-center py-12">{t('plan.noData')}</p>
+        <p className="text-fg-mute text-sm text-center py-12">{t('plan.noData')}</p>
       )}
     </div>
   )
@@ -214,47 +282,38 @@ function SupplementSection({ plan }: { plan: FitnessPlan }) {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <div className="w-14 h-14 rounded-full border border-white/[0.07] flex items-center justify-center">
-          <span className="text-white/15 text-2xl select-none">∅</span>
+        <div className="w-14 h-14 rounded-full border border-amber/[0.15] flex items-center justify-center">
+          <span className="text-fg-mute text-2xl select-none">∅</span>
         </div>
-        <p className="text-white/25 text-sm">{t('plan.supplements.none')}</p>
+        <p className="text-fg-mute text-sm">{t('plan.supplements.none')}</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-[#1a1d27] rounded-2xl border border-neon/[0.08] overflow-hidden shadow-card">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse min-w-[480px]">
-          <thead>
-            <tr className="border-b border-white/[0.06]">
-              {(['supplement', 'timing', 'amount', 'note'] as const).map((col) => (
-                <th
-                  key={col}
-                  className="text-left text-[10px] font-bold text-neon/45 uppercase tracking-[0.16em] px-4 py-3 whitespace-nowrap"
-                >
-                  {t(`plan.supplements.${col}`)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, i) => (
-              <tr
-                key={i}
-                className={i < items.length - 1 ? 'border-b border-white/[0.04]' : ''}
-              >
-                <td className="px-4 py-4 font-semibold text-white whitespace-nowrap">
-                  {item.supplement}
-                </td>
-                <td className="px-4 py-4 text-white/55">{item.zeitpunkt}</td>
-                <td className="px-4 py-4 font-mono text-neon/75 whitespace-nowrap">{item.menge}</td>
-                <td className="px-4 py-4 text-xs text-white/38 leading-relaxed">{item.hinweis}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="flex flex-col gap-2.5">
+      {items.map((item, i) => (
+        <article
+          key={i}
+          className="bg-bg-card rounded-[22px] border border-amber/[0.15] px-5 py-5 flex items-center gap-4"
+        >
+          <div className="w-11 h-11 rounded-xl bg-amber/[0.15] border border-amber/30 grid place-items-center text-amber font-bold flex-shrink-0">
+            {item.supplement.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-[15px] font-semibold text-fg m-0">{item.supplement}</h3>
+            <div className="flex flex-wrap gap-x-3 mt-0.5">
+              <span className="text-xs text-fg-mute">{item.menge}</span>
+              {item.hinweis && (
+                <span className="text-xs text-fg-mute/80">· {item.hinweis}</span>
+              )}
+            </div>
+          </div>
+          <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber whitespace-nowrap">
+            {item.zeitpunkt}
+          </span>
+        </article>
+      ))}
     </div>
   )
 }
@@ -287,16 +346,25 @@ export default function PlanPage() {
     i18n.changeLanguage(i18n.language.startsWith('de') ? 'en' : 'de')
   }
 
-  const currentLang = i18n.language.startsWith('en') ? 'en' : 'de'
+  const isDe = i18n.language.startsWith('de')
+  const currentLang = isDe ? 'de' : 'en'
   const langMismatch = planLang !== null && planLang !== currentLang
 
   if (!plan) {
     return (
-      <div className="min-h-screen bg-[#0f1117] flex flex-col items-center justify-center gap-5">
-        <p className="text-white/30 text-sm">{t('plan.noPlan')}</p>
+      <div className="relative min-h-screen text-fg flex flex-col items-center justify-center gap-5 px-4">
+        <div className="bg-stage" aria-hidden>
+          <div className="blob b1" />
+          <div className="blob b2" />
+        </div>
+        <p className="relative z-10 text-fg-mute text-sm">{t('plan.noPlan')}</p>
         <button
           onClick={() => navigate('/onboarding')}
-          className="px-6 py-3 rounded-xl bg-neon text-[#0f1117] font-bold text-sm shadow-neon hover:shadow-neon-lg transition-all"
+          className="relative z-10 px-6 py-3 rounded-2xl text-[#1a0e00] font-semibold text-sm transition-all hover:-translate-y-px"
+          style={{
+            background: 'linear-gradient(180deg, #f0a648 0%, #e8922a 100%)',
+            boxShadow: '0 0 20px rgba(232,146,42,0.30), inset 0 1px 0 rgba(255,255,255,0.18)',
+          }}
         >
           {t('plan.goToStart')}
         </button>
@@ -304,116 +372,171 @@ export default function PlanPage() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-[#0f1117] overflow-x-hidden">
+  const kcalTarget = plan.ernaehrungsplan?.kalorien_ziel ?? 0
+  const trainingDayCount = plan.trainingsplan?.length ?? 0
 
-      {/* ── Sticky header ── */}
-      <div className="bg-[#0f1117]/95 backdrop-blur-md border-b border-neon/[0.08] px-4 pt-10 pb-4 sticky top-0 z-20">
-        <div className="max-w-2xl mx-auto flex items-end justify-between">
-          <div>
-            <p className="text-[10px] font-bold text-neon tracking-[0.25em] uppercase mb-1.5">
-              {t('plan.subtitle')}
-            </p>
-            <h1 className="text-2xl font-bold text-white">{t('plan.title')}</h1>
-          </div>
-          <button
-            onClick={toggleLang}
-            className="px-3.5 py-1.5 rounded-lg border border-white/[0.08] text-xs font-mono font-bold text-white/40 hover:border-neon/30 hover:text-neon/70 transition-all"
-          >
-            {i18n.language.startsWith('de') ? 'EN' : 'DE'}
-          </button>
-        </div>
+  return (
+    <div className="relative min-h-screen text-fg">
+      <div className="bg-stage" aria-hidden>
+        <div className="blob b1" />
+        <div className="blob b2" />
+        <div className="blob b3" />
       </div>
 
-      {/* ── Section tabs ── */}
-      <div className="bg-[#0f1117]/95 backdrop-blur-md px-4 py-3 sticky top-[88px] z-10 border-b border-neon/[0.04]">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex gap-1 bg-[#1a1d27] rounded-xl p-1 border border-white/[0.04]">
-            {SECTIONS.map((s) => (
+      <div className="relative z-10 max-w-[720px] mx-auto pb-36">
+
+        {/* ── Sticky Header ── */}
+        <header className="sticky top-0 z-30 px-7 pt-7 pb-4 bg-gradient-to-b from-bg/95 via-bg/90 to-transparent backdrop-blur-md">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-amber mb-2">
+                {t('plan.subtitle')}
+              </p>
+              <h1 className="text-[34px] font-bold leading-[1.05] tracking-[-0.02em] text-fg m-0">
+                {t('plan.title')}
+              </h1>
+            </div>
+            <div className="inline-flex bg-bg-card border border-amber/[0.15] rounded-full p-[3px]">
+              <button
+                onClick={() => isDe || toggleLang()}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-[0.08em] transition-colors ${
+                  isDe ? 'bg-amber/[0.15] text-amber' : 'text-fg-mute'
+                }`}
+              >
+                DE
+              </button>
+              <button
+                onClick={() => !isDe || toggleLang()}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-[0.08em] transition-colors ${
+                  !isDe ? 'bg-amber/[0.15] text-amber' : 'text-fg-mute'
+                }`}
+              >
+                EN
+              </button>
+            </div>
+          </div>
+
+          {/* Header stat badges */}
+          <div className="flex gap-2 mt-3.5 flex-wrap">
+            <span className="inline-flex items-center gap-2 bg-bg-card border border-amber/[0.15] rounded-full pl-3 pr-3.5 py-1.5 text-xs text-fg-dim">
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-amber"
+                style={{ boxShadow: '0 0 8px rgba(232,146,42,0.6)' }}
+              />
+              <span className="text-fg font-semibold tabular-nums">
+                {kcalTarget.toLocaleString(isDe ? 'de-DE' : 'en-US')}
+              </span>
+              <span className="text-fg-mute tracking-[0.04em]">{t('plan.headerBadges.kcalDay')}</span>
+            </span>
+            <span className="inline-flex items-center gap-2 bg-bg-card border border-amber/[0.15] rounded-full pl-3 pr-3.5 py-1.5 text-xs text-fg-dim">
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-amber"
+                style={{ boxShadow: '0 0 8px rgba(232,146,42,0.6)' }}
+              />
+              <span className="text-fg font-semibold tabular-nums">{trainingDayCount}×</span>
+              <span className="text-fg-mute tracking-[0.04em]">{t('plan.headerBadges.trainingWeek')}</span>
+            </span>
+          </div>
+        </header>
+
+        {/* ── Underline tabs ── */}
+        <div className="flex gap-1 mx-7 mt-2 border-b border-white/[0.06]">
+          {SECTIONS.map((s) => {
+            const active = section === s
+            return (
               <button
                 key={s}
                 onClick={() => setSection(s)}
-                className={`flex-1 flex items-center justify-center min-h-[44px] py-2 rounded-lg text-[10px] sm:text-[11px] font-bold uppercase tracking-wide sm:tracking-wider transition-all ${
-                  section === s
-                    ? 'bg-neon text-[#0f1117] shadow-[0_0_12px_rgba(0,255,136,0.3)]'
-                    : 'text-white/30 hover:text-white/55'
+                className={`relative flex-1 min-h-[44px] py-3.5 px-2 text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+                  active ? 'text-amber' : 'text-fg-mute hover:text-fg-dim'
                 }`}
               >
                 {t(`plan.sections.${s}`)}
+                {active && (
+                  <span
+                    className="absolute left-[12%] right-[12%] -bottom-[1px] h-[2px] rounded-sm bg-amber"
+                    style={{ boxShadow: '0 0 12px rgba(232,146,42,0.65)' }}
+                  />
+                )}
               </button>
-            ))}
-          </div>
+            )
+          })}
         </div>
-      </div>
 
-      {/* ── Lang mismatch banner ── */}
-      {langMismatch && (
-        <div className="max-w-2xl mx-auto px-4 pt-4">
-          <div className="flex items-start gap-3 bg-amber-950/30 border border-amber-500/30 rounded-xl px-4 py-3">
-            <span className="text-amber-400 text-base flex-shrink-0 mt-0.5">⚠</span>
-            <p className="text-xs text-amber-300/80 leading-relaxed">{t('plan.langMismatch')}</p>
-          </div>
-        </div>
-      )}
-
-      {/* ── Scrollable content ── */}
-      <div className="max-w-2xl mx-auto px-4 py-5 pb-36">
-        {section === 'training' && (
-          <TrainingSection plan={plan} notes={notes} setNotes={setNotes} />
-        )}
-        {section === 'nutrition' && <NutritionSection plan={plan} />}
-        {section === 'supplements' && <SupplementSection plan={plan} />}
-
-        {/* General tips — always shown at bottom */}
-        {(plan.allgemeine_tipps?.length ?? 0) > 0 && (
-          <div className="mt-6 bg-[#1a1d27] rounded-2xl border border-neon/[0.08] p-5 flex flex-col gap-4 shadow-card">
-            <h3 className="text-[10px] font-bold text-neon uppercase tracking-[0.2em]">
-              {t('plan.tips')}
-            </h3>
-            <ul className="flex flex-col gap-3">
-              {plan.allgemeine_tipps.map((tip, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-3 text-sm text-white/55 leading-relaxed"
-                >
-                  <span className="text-neon font-bold mt-0.5 flex-shrink-0 tabular-nums w-4">
-                    {i + 1}.
-                  </span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
+        {/* ── Lang mismatch banner ── */}
+        {langMismatch && (
+          <div className="px-7 pt-4">
+            <div className="flex items-start gap-3 bg-amber/[0.08] border border-amber/30 rounded-xl px-4 py-3">
+              <span className="text-amber text-base flex-shrink-0 mt-0.5">⚠</span>
+              <p className="text-xs text-fg-dim leading-relaxed">{t('plan.langMismatch')}</p>
+            </div>
           </div>
         )}
+
+        {/* ── Scrollable content ── */}
+        <div className="px-7 mt-4 flex flex-col gap-3">
+          {section === 'training' && (
+            <TrainingSection plan={plan} notes={notes} setNotes={setNotes} />
+          )}
+          {section === 'nutrition' && <NutritionSection plan={plan} isDe={isDe} />}
+          {section === 'supplements' && <SupplementSection plan={plan} />}
+
+          {/* General tips */}
+          {(plan.allgemeine_tipps?.length ?? 0) > 0 && (
+            <div className="mt-4 bg-bg-card rounded-[22px] border border-amber/[0.15] p-5 flex flex-col gap-3">
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-mute m-0">
+                {t('plan.tips')}
+              </h3>
+              <ul className="flex flex-col gap-3 m-0 p-0 list-none">
+                {plan.allgemeine_tipps.map((tip, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-3 text-sm text-fg-dim leading-relaxed"
+                  >
+                    <span className="text-amber font-semibold mt-0.5 flex-shrink-0 tabular-nums w-4">
+                      {i + 1}.
+                    </span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Fixed bottom actions ── */}
-      <div className="fixed bottom-0 inset-x-0 bg-[#0f1117]/95 backdrop-blur-md border-t border-neon/[0.08] px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] z-20">
-        <div className="max-w-2xl mx-auto flex gap-3">
-          <button
-            onClick={() => navigate('/preferences')}
-            className="flex-1 py-3.5 rounded-xl border border-white/[0.08] text-white/45 hover:border-neon/25 hover:text-neon/65 font-semibold text-sm transition-all"
-          >
-            {t('plan.actions.regenerate')}
-          </button>
-          <button
-            onClick={handleExportPDF}
-            disabled={pdfLoading}
-            className="flex-1 py-3.5 rounded-xl font-bold text-sm text-[#0f1117]
-              bg-neon shadow-neon hover:shadow-neon-lg active:scale-[0.98]
-              transition-all duration-200 flex items-center justify-center gap-2
-              disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
-          >
-            {pdfLoading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-[#0f1117]/30 border-t-[#0f1117] rounded-full animate-spin" />
-                {t('plan.actions.pdfExporting')}
-              </>
-            ) : (
-              t('plan.actions.savePdf')
-            )}
-          </button>
-        </div>
+      <div className="fixed bottom-0 inset-x-0 z-30 max-w-[720px] mx-auto px-7 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-bg via-bg/95 to-transparent backdrop-blur-md flex gap-3">
+        <button
+          onClick={() => navigate('/preferences')}
+          className="flex-1 py-4 min-h-[52px] rounded-2xl bg-bg-card border border-amber/[0.15] text-fg font-semibold text-sm transition-all hover:bg-bg-elev hover:border-amber/30"
+        >
+          ↻ {t('plan.actions.regenerate')}
+        </button>
+        <button
+          onClick={handleExportPDF}
+          disabled={pdfLoading}
+          className="flex-1 py-4 min-h-[52px] rounded-2xl font-semibold text-sm text-[#1a0e00]
+            transition-all duration-200 hover:-translate-y-px
+            disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0
+            flex items-center justify-center gap-2"
+          style={{
+            background: 'linear-gradient(180deg, #f0a648 0%, #e8922a 100%)',
+            boxShadow: '0 0 20px rgba(232,146,42,0.30), inset 0 1px 0 rgba(255,255,255,0.18)',
+          }}
+        >
+          {pdfLoading ? (
+            <>
+              <span
+                className="w-3.5 h-3.5 rounded-full border-2 border-[#1a0e00]/30 animate-spin"
+                style={{ borderTopColor: '#1a0e00' }}
+              />
+              {t('plan.actions.pdfExporting')}
+            </>
+          ) : (
+            <>↓ {t('plan.actions.savePdf')}</>
+          )}
+        </button>
       </div>
     </div>
   )

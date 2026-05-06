@@ -191,7 +191,12 @@
       "sets": "Sätze",
       "reps": "Wdh.",
       "pause": "Pause",
+      "exercises": "Übungen",
       "notePlaceholder": "Notiz (z. B. Gewicht: 40 kg)"
+    },
+    "headerBadges": {
+      "kcalDay": "kcal / Tag",
+      "trainingWeek": "Training / Woche"
     },
     "nutrition": {
       "calories": "Kalorien",
