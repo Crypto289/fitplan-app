@@ -327,6 +327,7 @@ function getShoppingLabels(lang: 'de' | 'en') {
           carbs: 'Kohlenhydrate',
           veggies: 'Gemüse & Obst',
           dairy: 'Milchprodukte',
+          spices: 'Gewürze & Basics',
           other: 'Sonstiges',
         } as Record<IngredientCategory, string>,
       }
@@ -339,6 +340,7 @@ function getShoppingLabels(lang: 'de' | 'en') {
           carbs: 'Carbs',
           veggies: 'Vegetables & Fruit',
           dairy: 'Dairy',
+          spices: 'Spices & Basics',
           other: 'Other',
         } as Record<IngredientCategory, string>,
       }

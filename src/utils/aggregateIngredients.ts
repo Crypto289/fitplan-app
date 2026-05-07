@@ -1,8 +1,8 @@
 import type { FitnessPlan } from '../services/mistralService'
 
-export type IngredientCategory = 'protein' | 'dairy' | 'veggies' | 'carbs' | 'other'
+export type IngredientCategory = 'protein' | 'dairy' | 'veggies' | 'carbs' | 'spices' | 'other'
 
-export const CATEGORY_ORDER: IngredientCategory[] = ['protein', 'carbs', 'veggies', 'dairy', 'other']
+export const CATEGORY_ORDER: IngredientCategory[] = ['protein', 'carbs', 'veggies', 'dairy', 'spices', 'other']
 
 export interface AggregatedIngredient {
   name: string
@@ -15,6 +15,14 @@ export interface AggregatedIngredient {
 const UNIT_PATTERN = /^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|el|tl|stk|stück|tbsp|tsp|piece|pieces|x)?\s+(.+)$/i
 
 const KEYWORDS: Record<Exclude<IngredientCategory, 'other'>, string[]> = {
+  spices: [
+    'kurkuma', 'zimt', 'salz', 'pfeffer', 'gewürz', 'spice',
+    'zitrone', 'lemon', 'limette', 'lime',
+    'essig', 'vinegar',
+    'petersilie', 'parsley', 'basilikum', 'basil', 'oregano',
+    'thymian', 'thyme', 'ingwer', 'ginger', 'vanille', 'vanilla',
+    'senf', 'mustard', 'sojasoße', 'soy sauce',
+  ],
   // Order of resolution: protein → dairy → veggies → carbs → other
   // (Hüttenkäse contains "käse" → would otherwise hit dairy; we match protein first.)
   protein: [
@@ -57,7 +65,7 @@ const KEYWORDS: Record<Exclude<IngredientCategory, 'other'>, string[]> = {
 
 function categorize(rawName: string): IngredientCategory {
   const name = rawName.toLowerCase()
-  for (const cat of ['protein', 'dairy', 'veggies', 'carbs'] as const) {
+  for (const cat of ['protein', 'dairy', 'veggies', 'carbs', 'spices'] as const) {
     if (KEYWORDS[cat].some((kw) => name.includes(kw))) return cat
   }
   return 'other'
@@ -105,7 +113,7 @@ export function aggregateIngredients(
       for (const z of meal.zutaten ?? []) {
         const parsed = parseIngredient(z)
         if (!parsed.name) continue
-        const key = `${parsed.name.toLowerCase()}|${parsed.unit}`
+        const key = `${parsed.name.toLowerCase()}|${parsed.unit.toLowerCase()}`
         const existing = map.get(key)
         if (existing) {
           existing.quantity += parsed.quantity
@@ -117,7 +125,7 @@ export function aggregateIngredients(
   }
 
   const result: Record<IngredientCategory, AggregatedIngredient[]> = {
-    protein: [], carbs: [], veggies: [], dairy: [], other: [],
+    protein: [], carbs: [], veggies: [], dairy: [], spices: [], other: [],
   }
 
   for (const entry of map.values()) {

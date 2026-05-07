@@ -359,7 +359,7 @@ export default function OnboardingPage() {
                   return (
                     <label
                       key={g}
-                      className={`relative flex items-center gap-3.5 px-4 py-4 rounded-2xl border cursor-pointer transition-all select-none text-left text-sm font-medium ${
+                      className={`relative flex items-center gap-2.5 sm:gap-3.5 px-3 sm:px-4 py-3 sm:py-4 rounded-2xl border cursor-pointer transition-all select-none text-left text-xs sm:text-sm font-medium ${
                         active
                           ? 'border-amber bg-amber/[0.15] text-fg shadow-amber'
                           : errors.goal

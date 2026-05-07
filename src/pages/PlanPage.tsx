@@ -19,14 +19,14 @@ function StatPill({
   unit?: string
 }) {
   return (
-    <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl px-3 py-3 text-center">
-      <div className="text-[9.5px] font-semibold uppercase tracking-[0.22em] text-fg-mute mb-1.5">
+    <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl px-3 py-3 text-center overflow-hidden">
+      <div className="text-[9px] sm:text-[9.5px] font-semibold uppercase tracking-[0.22em] text-fg-mute mb-1.5">
         {label}
       </div>
-      <div className="text-[22px] font-bold tracking-[-0.01em] tabular-nums text-fg leading-none">
+      <div className="text-[17px] sm:text-[22px] font-bold tracking-[-0.01em] tabular-nums text-fg leading-tight break-words">
         {value}
         {unit && (
-          <span className="text-[11px] font-medium text-fg-mute ml-0.5 tracking-[0.04em]">
+          <span className="text-[10px] sm:text-[11px] font-medium text-fg-mute ml-0.5 tracking-[0.04em]">
             {unit}
           </span>
         )}
@@ -380,7 +380,12 @@ function SupplementSection({ plan }: { plan: FitnessPlan }) {
             {item.supplement.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-semibold text-fg m-0">{item.supplement}</h3>
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="text-[15px] font-semibold text-fg m-0 min-w-0 truncate">{item.supplement}</h3>
+              <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber flex-shrink-0 whitespace-nowrap">
+                {item.zeitpunkt}
+              </span>
+            </div>
             <div className="flex flex-wrap gap-x-3 mt-0.5">
               <span className="text-xs text-fg-mute">{item.menge}</span>
               {item.hinweis && (
@@ -388,9 +393,6 @@ function SupplementSection({ plan }: { plan: FitnessPlan }) {
               )}
             </div>
           </div>
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-amber whitespace-nowrap">
-            {item.zeitpunkt}
-          </span>
         </article>
       ))}
     </div>
@@ -520,14 +522,14 @@ export default function PlanPage() {
         </header>
 
         {/* ── Underline tabs ── */}
-        <div className="flex gap-1 mx-7 mt-2 border-b border-white/[0.06]">
+        <div className="flex gap-1 mt-2 border-b border-white/[0.06] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-7 -mx-7">
           {SECTIONS.map((s) => {
             const active = section === s
             return (
               <button
                 key={s}
                 onClick={() => setSection(s)}
-                className={`relative flex-1 min-h-[44px] py-3.5 px-2 text-[12px] font-semibold uppercase tracking-[0.18em] transition-colors ${
+                className={`relative flex-shrink-0 sm:flex-1 min-w-max min-h-[44px] py-3.5 px-3 text-[11px] sm:text-[12px] font-semibold uppercase tracking-[0.13em] sm:tracking-[0.18em] transition-colors ${
                   active ? 'text-amber' : 'text-fg-mute hover:text-fg-dim'
                 }`}
               >
