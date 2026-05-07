@@ -75,6 +75,30 @@
       "bodyFatRange": "Muss zwischen 5 und 60 % liegen"
     }
   },
+  "profiles": {
+    "title": "Profile",
+    "subtitle": "Wähle ein Profil",
+    "defaultName": "Mein Profil",
+    "newProfile": "Neues Profil",
+    "newProfileTitle": "Profil erstellen",
+    "switchProfile": "Profil wechseln",
+    "selectAvatar": "Avatar wählen",
+    "profileName": "Profilname",
+    "profileNamePlaceholder": "z. B. Max",
+    "lastPlan": "Letzter Plan: {{date}}",
+    "noPlanYet": "Noch kein Plan",
+    "delete": "Löschen",
+    "deleteConfirmTitle": "Profil löschen?",
+    "deleteConfirmBody": "Diese Aktion kann nicht rückgängig gemacht werden. Trainings- und Mahlzeitenverlauf gehen verloren.",
+    "deleteCancel": "Abbrechen",
+    "deleteConfirmBtn": "Ja, löschen",
+    "create": "Erstellen",
+    "cancel": "Abbrechen",
+    "maxReached": "Maximal 3 Profile pro Gerät",
+    "empty": "Noch keine Profile — erstelle dein erstes!",
+    "previousExercises": "Bisherige Übungen (diese bewusst variieren, nicht kopieren)",
+    "previousMeals": "Bisherige Mahlzeiten (neue Namen verwenden)"
+  },
   "preferences": {
     "title": "Präferenzen",
     "step": "Schritt {{step}} von {{total}}",
@@ -209,11 +233,11 @@
       "exporting": "PDF wird erstellt …",
       "empty": "Keine Zutaten vorhanden",
       "categories": {
-        "protein": "Proteine",
-        "carbs": "Kohlenhydrate",
-        "veggies": "Gemüse & Obst",
-        "dairy": "Milchprodukte",
-        "spices": "Gewürze & Basics",
+        "produce": "Obst & Gemüse",
+        "meat_fish": "Fleisch & Fisch",
+        "dairy_eggs": "Kühlregal",
+        "dry_goods": "Trockenwaren",
+        "spices_sauces": "Gewürze & Saucen",
         "other": "Sonstiges"
       }
     },

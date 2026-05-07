@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useProfile } from '../context/ProfileContext'
 
 type Gender = 'male' | 'female' | 'diverse'
 type Experience = 'beginner' | 'intermediate' | 'advanced'
@@ -186,13 +187,18 @@ function Field({
 export default function OnboardingPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const { activeProfile, updateActiveProfileData } = useProfile()
 
   function toggleLang() {
     i18n.changeLanguage(i18n.language.startsWith('de') ? 'en' : 'de')
   }
-  const [form, setForm] = useState<ProfileData>(INITIAL)
+  const [form, setForm] = useState<ProfileData>(activeProfile?.profileData ?? INITIAL)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
+
+  useEffect(() => {
+    if (!activeProfile) navigate('/profiles', { replace: true })
+  }, [activeProfile, navigate])
 
   function patch<K extends keyof ProfileData>(key: K, value: ProfileData[K]) {
     const next = { ...form, [key]: value }
@@ -208,7 +214,7 @@ export default function OnboardingPage() {
       document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth' })
       return
     }
-    localStorage.setItem('fitplan_profile', JSON.stringify(form))
+    updateActiveProfileData(form)
     navigate('/onboarding/goals')
   }
 
@@ -240,22 +246,35 @@ export default function OnboardingPage() {
                 {t('onboarding.title')}
               </h1>
             </div>
-            <div className="inline-flex bg-bg-card border border-amber/[0.15] rounded-full p-[3px]">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="inline-flex bg-bg-card border border-amber/[0.15] rounded-full p-[3px]">
+                <button
+                  onClick={() => isDe || toggleLang()}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-[0.08em] transition-colors ${
+                    isDe ? 'bg-amber/[0.15] text-amber' : 'text-fg-mute'
+                  }`}
+                >
+                  DE
+                </button>
+                <button
+                  onClick={() => !isDe || toggleLang()}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-[0.08em] transition-colors ${
+                    !isDe ? 'bg-amber/[0.15] text-amber' : 'text-fg-mute'
+                  }`}
+                >
+                  EN
+                </button>
+              </div>
               <button
-                onClick={() => isDe || toggleLang()}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-[0.08em] transition-colors ${
-                  isDe ? 'bg-amber/[0.15] text-amber' : 'text-fg-mute'
-                }`}
+                onClick={() => navigate('/profiles')}
+                aria-label={t('profiles.switchProfile')}
+                title={t('profiles.switchProfile')}
+                className="w-10 h-10 rounded-full bg-bg-card border border-amber/[0.15] text-fg-dim hover:text-amber hover:border-amber/30 grid place-items-center transition-colors"
               >
-                DE
-              </button>
-              <button
-                onClick={() => !isDe || toggleLang()}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-[0.08em] transition-colors ${
-                  !isDe ? 'bg-amber/[0.15] text-amber' : 'text-fg-mute'
-                }`}
-              >
-                EN
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M7 7h13M16 3l4 4-4 4" />
+                  <path d="M17 17H4M8 21l-4-4 4-4" />
+                </svg>
               </button>
             </div>
           </div>

@@ -323,11 +323,11 @@ function getShoppingLabels(lang: 'de' | 'en') {
         created: 'Erstellt am',
         empty: 'Keine Zutaten vorhanden',
         cats: {
-          protein: 'Proteine',
-          carbs: 'Kohlenhydrate',
-          veggies: 'Gemüse & Obst',
-          dairy: 'Milchprodukte',
-          spices: 'Gewürze & Basics',
+          produce: 'Obst & Gemüse',
+          meat_fish: 'Fleisch & Fisch',
+          dairy_eggs: 'Kühlregal',
+          dry_goods: 'Trockenwaren',
+          spices_sauces: 'Gewürze & Saucen',
           other: 'Sonstiges',
         } as Record<IngredientCategory, string>,
       }
@@ -336,11 +336,11 @@ function getShoppingLabels(lang: 'de' | 'en') {
         created: 'Created on',
         empty: 'No ingredients found',
         cats: {
-          protein: 'Proteins',
-          carbs: 'Carbs',
-          veggies: 'Vegetables & Fruit',
-          dairy: 'Dairy',
-          spices: 'Spices & Basics',
+          produce: 'Fruit & Vegetables',
+          meat_fish: 'Meat & Fish',
+          dairy_eggs: 'Dairy & Eggs',
+          dry_goods: 'Dry Goods',
+          spices_sauces: 'Spices & Sauces',
           other: 'Other',
         } as Record<IngredientCategory, string>,
       }

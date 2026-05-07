@@ -1,8 +1,21 @@
 import type { FitnessPlan } from '../services/mistralService'
 
-export type IngredientCategory = 'protein' | 'dairy' | 'veggies' | 'carbs' | 'spices' | 'other'
+export type IngredientCategory =
+  | 'produce'
+  | 'meat_fish'
+  | 'dairy_eggs'
+  | 'dry_goods'
+  | 'spices_sauces'
+  | 'other'
 
-export const CATEGORY_ORDER: IngredientCategory[] = ['protein', 'carbs', 'veggies', 'dairy', 'spices', 'other']
+export const CATEGORY_ORDER: IngredientCategory[] = [
+  'produce',
+  'meat_fish',
+  'dairy_eggs',
+  'dry_goods',
+  'spices_sauces',
+  'other',
+]
 
 export interface AggregatedIngredient {
   name: string
@@ -15,57 +28,93 @@ export interface AggregatedIngredient {
 const UNIT_PATTERN = /^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|el|tl|stk|stück|tbsp|tsp|piece|pieces|x)?\s+(.+)$/i
 
 const KEYWORDS: Record<Exclude<IngredientCategory, 'other'>, string[]> = {
-  spices: [
-    'kurkuma', 'zimt', 'salz', 'pfeffer', 'gewürz', 'spice',
-    'zitrone', 'lemon', 'limette', 'lime',
-    'essig', 'vinegar',
-    'petersilie', 'parsley', 'basilikum', 'basil', 'oregano',
-    'thymian', 'thyme', 'ingwer', 'ginger', 'vanille', 'vanilla',
-    'senf', 'mustard', 'sojasoße', 'soy sauce',
+  // Resolution order: meat_fish → dairy_eggs → dry_goods → spices_sauces → produce → other.
+  // Compound names like "Hähnchenwurst" hit meat first; "Tomatensoße" matches "soße" before
+  // "tomate" so it lands in spices_sauces; fresh "Tomate" falls through to produce.
+  meat_fish: [
+    'huhn', 'hähnchen', 'chicken', 'pute', 'turkey',
+    'rind', 'beef', 'steak', 'hackfleisch', 'mince', 'ground meat',
+    'schwein', 'pork', 'speck', 'bacon', 'schinken', 'ham',
+    'wurst', 'sausage', 'salami', 'lamm', 'lamb',
+    'lachs', 'salmon', 'thunfisch', 'tuna', 'fisch', 'fish',
+    'shrimp', 'garnele', 'kabeljau', 'cod', 'hering', 'herring',
+    'makrele', 'mackerel', 'forelle', 'trout', 'sardine',
   ],
-  // Order of resolution: protein → dairy → veggies → carbs → other
-  // (Hüttenkäse contains "käse" → would otherwise hit dairy; we match protein first.)
-  protein: [
-    'huhn', 'hähnchen', 'chicken', 'pute', 'turkey', 'rind', 'beef', 'steak',
-    'schwein', 'pork', 'speck', 'bacon', 'schinken', 'ham', 'wurst', 'sausage',
-    'lachs', 'salmon', 'thunfisch', 'tuna', 'fisch', 'fish', 'shrimp', 'garnele',
-    'ei ', 'eier', 'egg', 'tofu', 'tempeh', 'seitan',
-    'linsen', 'lentil', 'kichererbse', 'chickpea', 'bohnen', 'beans', 'kidneybohne',
-    'quark', 'skyr', 'hüttenkäse', 'cottage cheese', 'magerquark',
+  dairy_eggs: [
+    'frischkäse', 'feta', 'mozzarella', 'parmesan', 'gouda', 'cheddar', 'ricotta',
+    'käse', 'cheese',
+    'milch', 'milk', 'joghurt', 'yogurt',
+    'butter', 'sahne', 'cream',
+    'magerquark', 'hüttenkäse', 'cottage cheese', 'quark', 'skyr',
+    'eier', 'egg',
+  ],
+  dry_goods: [
+    'reis', 'rice', 'pasta', 'nudel', 'noodle', 'spaghetti',
+    'brot', 'bread', 'toast', 'brötchen', 'roll', 'baguette',
+    'hafer', 'oat', 'müsli', 'granola', 'cornflake',
+    'quinoa', 'couscous', 'bulgur', 'mehl', 'flour',
+    'tortilla', 'wrap', 'pita', 'cracker', 'reiswaffel',
+    'linsen', 'lentil', 'kichererbse', 'chickpea',
+    'bohnen', 'beans', 'kidneybohne',
+    'tofu', 'tempeh', 'seitan',
     'whey', 'eiweißpulver', 'protein pulver', 'protein powder', 'eiweiß',
+    'mandel', 'almond', 'walnuss', 'walnut', 'cashew',
+    'haselnuss', 'hazelnut', 'erdnuss', 'peanut', 'pistazie', 'pistachio',
+    'nuss', 'nut',
+    'kürbiskern', 'sonnenblumenkern', 'leinsamen', 'flaxseed',
+    'chiasamen', 'chia samen', 'chia seed', 'samen', 'seed',
+    'rosine', 'raisin', 'dattel', 'date',
   ],
-  dairy: [
-    'milch', 'milk', 'joghurt', 'yogurt', 'käse', 'cheese',
-    'butter', 'sahne', 'cream', 'frischkäse', 'feta', 'mozzarella',
-    'parmesan', 'gouda', 'cheddar', 'ricotta',
+  spices_sauces: [
+    'kurkuma', 'zimt', 'salz', 'pfeffer', 'gewürz', 'spice',
+    'vanille', 'vanilla', 'paprikapulver', 'chili', 'curry',
+    'muskat', 'nutmeg', 'kümmel', 'cumin',
+    'olivenöl', 'olive oil', 'kokosöl', 'coconut oil',
+    'rapsöl', 'sonnenblumenöl', 'sunflower oil', 'leinöl',
+    'öl', 'oil',
+    'essig', 'vinegar', 'balsamico',
+    'senf', 'mustard',
+    'sojasoße', 'sojasauce', 'soy sauce',
+    'ketchup', 'mayo', 'mayonnaise',
+    'soße', 'sauce', 'salsa', 'pesto', 'hummus', 'tahini',
+    'honig', 'honey', 'ahornsirup', 'maple syrup',
+    'agavendicksaft', 'agave', 'zucker', 'sugar',
+    'brühe', 'broth', 'bouillon', 'fond',
   ],
-  veggies: [
-    'spinat', 'spinach', 'brokkoli', 'broccoli', 'blumenkohl', 'cauliflower',
+  produce: [
+    // veggies
+    'spinat', 'spinach', 'brokkoli', 'broccoli',
+    'blumenkohl', 'cauliflower',
     'paprika', 'pepper', 'tomate', 'tomato', 'gurke', 'cucumber',
     'salat', 'lettuce', 'rucola', 'arugula',
     'zwiebel', 'onion', 'knoblauch', 'garlic', 'lauch', 'leek',
     'karotte', 'möhre', 'carrot', 'zucchini', 'aubergine', 'eggplant',
     'pilz', 'mushroom', 'champignon',
-    'beere', 'berry', 'berries', 'blaubeere', 'blueberry', 'erdbeere', 'strawberry',
-    'himbeere', 'raspberry', 'banane', 'banana', 'apfel', 'apple',
-    'birne', 'pear', 'orange', 'apfelsine', 'mandarine', 'tangerine',
-    'avocado', 'kürbis', 'pumpkin', 'spargel', 'asparagus',
+    'kürbis', 'pumpkin', 'spargel', 'asparagus',
     'erbsen', 'pea', 'mais', 'corn', 'rote bete', 'beetroot',
     'sellerie', 'celery', 'kohl', 'cabbage', 'rosenkohl',
-  ],
-  carbs: [
-    'reis', 'rice', 'pasta', 'nudel', 'noodle', 'spaghetti',
-    'brot', 'bread', 'toast', 'brötchen', 'roll', 'baguette',
-    'hafer', 'oat', 'müsli', 'granola', 'cornflake',
     'kartoffel', 'potato', 'süßkartoffel', 'sweet potato',
-    'quinoa', 'couscous', 'bulgur', 'mehl', 'flour',
-    'tortilla', 'wrap', 'pita', 'cracker', 'reiswaffel',
+    // fruits
+    'beere', 'berry', 'berries', 'blaubeere', 'blueberry',
+    'erdbeere', 'strawberry', 'himbeere', 'raspberry',
+    'banane', 'banana', 'apfel', 'apple', 'birne', 'pear',
+    'orange', 'apfelsine', 'mandarine', 'tangerine',
+    'avocado', 'zitrone', 'lemon', 'limette', 'lime',
+    'traube', 'grape', 'melone', 'melon', 'ananas', 'pineapple',
+    'kiwi', 'mango', 'pfirsich', 'peach', 'kirsche', 'cherry',
+    // fresh herbs
+    'petersilie', 'parsley', 'basilikum', 'basil', 'oregano',
+    'thymian', 'thyme', 'schnittlauch', 'chive',
+    'koriander', 'cilantro', 'dill', 'rosmarin', 'rosemary',
+    'salbei', 'sage', 'minze', 'mint',
+    // root
+    'ingwer', 'ginger',
   ],
 }
 
 function categorize(rawName: string): IngredientCategory {
   const name = rawName.toLowerCase()
-  for (const cat of ['protein', 'dairy', 'veggies', 'carbs', 'spices'] as const) {
+  for (const cat of ['meat_fish', 'dairy_eggs', 'dry_goods', 'spices_sauces', 'produce'] as const) {
     if (KEYWORDS[cat].some((kw) => name.includes(kw))) return cat
   }
   return 'other'
@@ -125,7 +174,7 @@ export function aggregateIngredients(
   }
 
   const result: Record<IngredientCategory, AggregatedIngredient[]> = {
-    protein: [], carbs: [], veggies: [], dairy: [], spices: [], other: [],
+    produce: [], meat_fish: [], dairy_eggs: [], dry_goods: [], spices_sauces: [], other: [],
   }
 
   for (const entry of map.values()) {

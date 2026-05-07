@@ -75,6 +75,30 @@
       "bodyFatRange": "Must be between 5 and 60 %"
     }
   },
+  "profiles": {
+    "title": "Profiles",
+    "subtitle": "Choose a profile",
+    "defaultName": "My Profile",
+    "newProfile": "New Profile",
+    "newProfileTitle": "Create Profile",
+    "switchProfile": "Switch profile",
+    "selectAvatar": "Choose avatar",
+    "profileName": "Profile name",
+    "profileNamePlaceholder": "e.g. Max",
+    "lastPlan": "Last plan: {{date}}",
+    "noPlanYet": "No plan yet",
+    "delete": "Delete",
+    "deleteConfirmTitle": "Delete profile?",
+    "deleteConfirmBody": "This cannot be undone. Training and meal history will be lost.",
+    "deleteCancel": "Cancel",
+    "deleteConfirmBtn": "Yes, delete",
+    "create": "Create",
+    "cancel": "Cancel",
+    "maxReached": "Max 3 profiles per device",
+    "empty": "No profiles yet — create your first!",
+    "previousExercises": "Previously used exercises (deliberately vary, do not copy)",
+    "previousMeals": "Previously used meals (use new names)"
+  },
   "preferences": {
     "title": "Preferences",
     "step": "Step {{step}} of {{total}}",
@@ -209,11 +233,11 @@
       "exporting": "Creating PDF …",
       "empty": "No ingredients found",
       "categories": {
-        "protein": "Proteins",
-        "carbs": "Carbs",
-        "veggies": "Vegetables & Fruit",
-        "dairy": "Dairy",
-        "spices": "Spices & Basics",
+        "produce": "Fruit & Vegetables",
+        "meat_fish": "Meat & Fish",
+        "dairy_eggs": "Dairy & Eggs",
+        "dry_goods": "Dry Goods",
+        "spices_sauces": "Spices & Sauces",
         "other": "Other"
       }
     },

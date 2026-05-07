@@ -327,10 +327,32 @@ ${JSON_SCHEMA}`
 
 // ── User prompt ───────────────────────────────────────────────────────────────
 
+function buildPreviousList(plans: FitnessPlan[]): { exercises: string[]; meals: string[] } {
+  const exerciseSet = new Set<string>()
+  const mealSet = new Set<string>()
+  for (const p of plans) {
+    for (const day of p.trainingsplan ?? []) {
+      for (const ex of day.uebungen ?? []) {
+        if (ex.name) exerciseSet.add(ex.name.trim())
+      }
+    }
+    for (const day of p.ernaehrungsplan?.wochentage ?? []) {
+      for (const m of day.mahlzeiten ?? []) {
+        if (m.name) mealSet.add(m.name.trim())
+      }
+    }
+  }
+  return {
+    exercises: Array.from(exerciseSet).slice(0, 30),
+    meals: Array.from(mealSet).slice(0, 40),
+  }
+}
+
 function buildUserPrompt(
   profile: ProfileData,
   preferences: PreferencesData,
   lang: 'de' | 'en',
+  previousPlans?: FitnessPlan[],
 ): string {
   const L = lang
   const bmi =
@@ -423,6 +445,23 @@ function buildUserPrompt(
       `Halte Präferenz "${preferences.dietPreferences.join(' / ')}" und Budget ${preferences.nutritionBudget} € / Woche strikt ein.`,
       'WICHTIG: Variiere bewusst — verwende keine Standard-Übungen oder -Rezepte aus vorherigen Generierungen.',
     )
+    if (previousPlans && previousPlans.length > 0) {
+      const { exercises, meals } = buildPreviousList(previousPlans)
+      if (exercises.length > 0) {
+        lines.push(
+          '',
+          '=== BISHERIGE ÜBUNGEN (DIESE BEWUSST VARIIEREN, NICHT KOPIEREN) ===',
+          exercises.join(', '),
+        )
+      }
+      if (meals.length > 0) {
+        lines.push(
+          '',
+          '=== BISHERIGE MAHLZEITEN (NEUE NAMEN VERWENDEN) ===',
+          meals.join(', '),
+        )
+      }
+    }
   } else {
     lines.push(
       '=== GOAL (MOST IMPORTANT PARAMETER) ===',
@@ -477,6 +516,23 @@ function buildUserPrompt(
       `Strictly follow "${preferences.dietPreferences.join(' / ')}" preference and weekly budget of €${preferences.nutritionBudget}.`,
       'IMPORTANT: vary deliberately — do not reuse standard exercises or recipes from previous generations.',
     )
+    if (previousPlans && previousPlans.length > 0) {
+      const { exercises, meals } = buildPreviousList(previousPlans)
+      if (exercises.length > 0) {
+        lines.push(
+          '',
+          '=== PREVIOUSLY USED EXERCISES (DELIBERATELY VARY, DO NOT COPY) ===',
+          exercises.join(', '),
+        )
+      }
+      if (meals.length > 0) {
+        lines.push(
+          '',
+          '=== PREVIOUSLY USED MEALS (USE NEW NAMES) ===',
+          meals.join(', '),
+        )
+      }
+    }
   }
 
   return lines.filter((l) => l !== '').join('\n')
@@ -488,6 +544,7 @@ export async function generatePlan(
   profile: ProfileData,
   preferences: PreferencesData,
   lang: 'de' | 'en' = 'de',
+  previousPlans?: FitnessPlan[],
 ): Promise<FitnessPlan> {
   const apiKey = import.meta.env.VITE_MISTRAL_API_KEY
   if (!apiKey) {
@@ -503,7 +560,7 @@ export async function generatePlan(
     model: MODEL,
     messages: [
       { role: 'system', content: buildSystemPrompt(lang, mealCountHint) },
-      { role: 'user', content: buildUserPrompt(profile, preferences, lang) },
+      { role: 'user', content: buildUserPrompt(profile, preferences, lang, previousPlans) },
     ],
     temperature: 0.85,
     max_tokens: 8192,

@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { generatePlan, MistralError } from '../services/mistralService'
-import { usePlan } from '../context/PlanContext'
-import type { ProfileData } from './OnboardingPage'
+import { useProfile } from '../context/ProfileContext'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -184,13 +183,21 @@ function SliderField({
 export default function PreferencesPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { setPlan } = usePlan()
-  const [form, setForm] = useState<PreferencesData>(INITIAL)
+  const {
+    activeProfile,
+    updateActivePreferencesData,
+    appendPlanToHistory,
+  } = useProfile()
+  const [form, setForm] = useState<PreferencesData>(activeProfile?.preferencesData ?? INITIAL)
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const errorRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!activeProfile) navigate('/profiles', { replace: true })
+  }, [activeProfile, navigate])
 
   useEffect(() => {
     if (apiError && errorRef.current) {
@@ -265,19 +272,19 @@ export default function PreferencesPage() {
       document.getElementById('pref-top')?.scrollIntoView({ behavior: 'smooth' })
       return
     }
-    localStorage.setItem('fitplan_preferences', JSON.stringify(form))
+    updateActivePreferencesData(form)
     setLoading(true)
     setApiError(null)
     try {
-      const stored = localStorage.getItem('fitplan_profile')
-      if (!stored) {
+      const profile = activeProfile?.profileData
+      if (!profile) {
         navigate('/onboarding')
         return
       }
-      const profile = JSON.parse(stored) as ProfileData
       const lang = (i18n.language.startsWith('en') ? 'en' : 'de') as 'de' | 'en'
-      const plan = await generatePlan(profile, form, lang)
-      setPlan(plan, lang)
+      const previousPlans = (activeProfile?.planHistory ?? []).slice(-4).map((h) => h.plan)
+      const plan = await generatePlan(profile, form, lang, previousPlans)
+      appendPlanToHistory(plan, lang)
       navigate('/plan')
     } catch (err) {
       if (err instanceof MistralError) {
