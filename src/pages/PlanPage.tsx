@@ -2,10 +2,12 @@ import { useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePlan } from '../context/PlanContext'
+import { useProfile } from '../context/ProfileContext'
 import { exportPDF } from '../utils/exportPDF'
 import type { FitnessPlan, Mahlzeit } from '../services/mistralService'
 import ShoppingListModal from '../components/ShoppingListModal'
 import NotesSection from '../components/NotesSection'
+import TrackerSection from '../components/TrackerSection'
 
 // First non-whitespace token, capped at 2 chars — turns "Montag" → "Mo",
 // "Donnerstag (Push)" → "Do", "Monday" → "Mo".
@@ -427,11 +429,12 @@ function SupplementSection({ plan }: { plan: FitnessPlan }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-type Section = 'training' | 'nutrition' | 'supplements' | 'notes'
-const SECTIONS: Section[] = ['training', 'nutrition', 'supplements', 'notes']
+type Section = 'training' | 'nutrition' | 'supplements' | 'notes' | 'tracker'
+const SECTIONS: Section[] = ['training', 'nutrition', 'supplements', 'notes', 'tracker']
 
 export default function PlanPage() {
   const { plan, planLang } = usePlan()
+  const { activeProfile } = useProfile()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [section, setSection] = useState<Section>('training')
@@ -608,9 +611,12 @@ export default function PlanPage() {
           )}
           {section === 'supplements' && <SupplementSection plan={plan} />}
           {section === 'notes' && <NotesSection lang={isDe ? 'de' : 'en'} />}
+          {section === 'tracker' && activeProfile && (
+            <TrackerSection profileId={activeProfile.id} locale={isDe ? 'de-DE' : 'en-US'} />
+          )}
 
           {/* General tips */}
-          {section !== 'notes' && (plan.allgemeine_tipps?.length ?? 0) > 0 && (
+          {section !== 'notes' && section !== 'tracker' && (plan.allgemeine_tipps?.length ?? 0) > 0 && (
             <div className="mt-4 bg-bg-card rounded-[22px] border border-amber/[0.15] p-5 flex flex-col gap-3">
               <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-mute m-0">
                 {t('plan.tips')}

@@ -13,6 +13,7 @@ import {
   trimHistory,
   type FitProfile,
 } from '../utils/profileStore'
+import { clearEntries as clearTrackerEntries } from '../utils/trackerStore'
 
 interface ProfileContextValue {
   profiles: FitProfile[]
@@ -28,6 +29,8 @@ interface ProfileContextValue {
   plan: FitnessPlan | null
   planLang: 'de' | 'en' | null
   appendPlanToHistory(plan: FitnessPlan, lang: 'de' | 'en'): void
+  activatePlanFromHistory(profileId: string, idx: number): void
+  deletePlanFromHistory(profileId: string, idx: number): void
 }
 
 const ProfileContext = createContext<ProfileContextValue | null>(null)
@@ -92,9 +95,18 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       const next = profiles.filter((p) => p.id !== id)
       const nextActive =
         activeId === id ? (next[0]?.id ?? null) : activeId
+      clearTrackerEntries(id)
       writeProfiles(next, nextActive)
     },
     [profiles, activeId, writeProfiles],
+  )
+
+  const patchProfile = useCallback(
+    (id: string, patch: (p: FitProfile) => FitProfile) => {
+      const next = profiles.map((p) => (p.id === id ? patch(p) : p))
+      writeProfiles(next)
+    },
+    [profiles, writeProfiles],
   )
 
   const patchActive = useCallback(
@@ -126,11 +138,46 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         ...p,
         planHistory: trimHistory([
           ...p.planHistory,
-          { date: new Date().toISOString(), lang, plan },
+          { date: new Date().toISOString(), lang, plan, goal: p.profileData?.goal },
         ]),
       }))
     },
     [patchActive],
+  )
+
+  const activatePlanFromHistory = useCallback(
+    (profileId: string, idx: number) => {
+      const target = profiles.find((p) => p.id === profileId)
+      if (!target || idx < 0 || idx >= target.planHistory.length) return
+      const reordered = [
+        ...target.planHistory.slice(0, idx),
+        ...target.planHistory.slice(idx + 1),
+        target.planHistory[idx],
+      ]
+      const next = profiles.map((p) =>
+        p.id === profileId ? { ...p, planHistory: reordered } : p,
+      )
+      persistProfiles(next)
+      persistActiveId(profileId)
+      setStore({ profiles: next, activeId: profileId })
+    },
+    [profiles],
+  )
+
+  const deletePlanFromHistory = useCallback(
+    (profileId: string, idx: number) => {
+      patchProfile(profileId, (p) => {
+        if (idx < 0 || idx >= p.planHistory.length) return p
+        return {
+          ...p,
+          planHistory: [
+            ...p.planHistory.slice(0, idx),
+            ...p.planHistory.slice(idx + 1),
+          ],
+        }
+      })
+    },
+    [patchProfile],
   )
 
   const lastEntry =
@@ -150,6 +197,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     plan: lastEntry?.plan ?? null,
     planLang: lastEntry?.lang ?? null,
     appendPlanToHistory,
+    activatePlanFromHistory,
+    deletePlanFromHistory,
   }
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>

@@ -97,7 +97,20 @@
     "maxReached": "Maximal 3 Profile pro Gerät",
     "empty": "Noch keine Profile — erstelle dein erstes!",
     "previousExercises": "Bisherige Übungen (diese bewusst variieren, nicht kopieren)",
-    "previousMeals": "Bisherige Mahlzeiten (neue Namen verwenden)"
+    "previousMeals": "Bisherige Mahlzeiten (neue Namen verwenden)",
+    "plansGenerated_one": "{{count}} Plan generiert",
+    "plansGenerated_other": "{{count}} Pläne generiert",
+    "history": {
+      "button": "Verlauf anzeigen",
+      "title": "Plan-Verlauf",
+      "subtitle": "Alle gespeicherten Pläne dieses Profils",
+      "load": "Plan laden",
+      "delete": "Löschen",
+      "close": "Schließen",
+      "kcalDay": "{{n}} kcal / Tag",
+      "unknownGoal": "Trainingsplan",
+      "empty": "Noch keine Pläne"
+    }
   },
   "preferences": {
     "title": "Präferenzen",
@@ -230,7 +243,23 @@
       "training": "Training",
       "nutrition": "Ernährung",
       "supplements": "Supplemente",
-      "notes": "Notizen"
+      "notes": "Notizen",
+      "tracker": "Tracker"
+    },
+    "tracker": {
+      "title": "Gewicht & Körperfett",
+      "intro": "Verfolge deinen Fortschritt über die Zeit.",
+      "date": "Datum",
+      "weight": "Gewicht (kg)",
+      "bodyFat": "Körperfett (%)",
+      "note": "Notiz",
+      "notePlaceholder": "Notiz (optional, max. 200 Zeichen)",
+      "addEntry": "Eintrag hinzufügen",
+      "empty": "Noch keine Einträge — leg los!",
+      "chartLegendWeight": "Gewicht",
+      "chartLegendBodyFat": "Körperfett",
+      "delete": "Eintrag löschen",
+      "charsLeft": "{{n}}/200"
     },
     "training": {
       "sets": "Sätze",

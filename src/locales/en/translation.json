@@ -97,7 +97,20 @@
     "maxReached": "Max 3 profiles per device",
     "empty": "No profiles yet — create your first!",
     "previousExercises": "Previously used exercises (deliberately vary, do not copy)",
-    "previousMeals": "Previously used meals (use new names)"
+    "previousMeals": "Previously used meals (use new names)",
+    "plansGenerated_one": "{{count}} plan generated",
+    "plansGenerated_other": "{{count}} plans generated",
+    "history": {
+      "button": "Show history",
+      "title": "Plan history",
+      "subtitle": "All saved plans for this profile",
+      "load": "Load plan",
+      "delete": "Delete",
+      "close": "Close",
+      "kcalDay": "{{n}} kcal / day",
+      "unknownGoal": "Training plan",
+      "empty": "No plans yet"
+    }
   },
   "preferences": {
     "title": "Preferences",
@@ -230,7 +243,23 @@
       "training": "Training",
       "nutrition": "Nutrition",
       "supplements": "Supplements",
-      "notes": "Notes"
+      "notes": "Notes",
+      "tracker": "Tracker"
+    },
+    "tracker": {
+      "title": "Weight & Body fat",
+      "intro": "Track your progress over time.",
+      "date": "Date",
+      "weight": "Weight (kg)",
+      "bodyFat": "Body fat (%)",
+      "note": "Note",
+      "notePlaceholder": "Note (optional, max 200 chars)",
+      "addEntry": "Add entry",
+      "empty": "No entries yet — get started!",
+      "chartLegendWeight": "Weight",
+      "chartLegendBodyFat": "Body fat",
+      "delete": "Delete entry",
+      "charsLeft": "{{n}}/200"
     },
     "training": {
       "sets": "Sets",

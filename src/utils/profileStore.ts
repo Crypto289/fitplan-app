@@ -28,6 +28,7 @@ export interface PlanHistoryEntry {
   date: string
   lang: 'de' | 'en'
   plan: FitnessPlan
+  goal?: string
 }
 
 export interface FitProfile {

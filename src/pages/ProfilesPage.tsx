@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useProfile } from '../context/ProfileContext'
-import { AVATAR_OPTIONS, type FitProfile } from '../utils/profileStore'
+import { AVATAR_OPTIONS, type FitProfile, type PlanHistoryEntry } from '../utils/profileStore'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -25,18 +25,18 @@ function ProfileCard({
   locale,
   onSelect,
   onDelete,
+  onHistory,
 }: {
   profile: FitProfile
   locale: string
   onSelect: () => void
   onDelete: () => void
+  onHistory: () => void
 }) {
   const { t } = useTranslation()
-  const last =
-    profile.planHistory.length > 0
-      ? profile.planHistory[profile.planHistory.length - 1]
-      : null
-  const subtitle = last
+  const count = profile.planHistory.length
+  const last = count > 0 ? profile.planHistory[count - 1] : null
+  const lastLine = last
     ? t('profiles.lastPlan', { date: formatDate(last.date, locale) })
     : t('profiles.noPlanYet')
 
@@ -52,9 +52,29 @@ function ProfileCard({
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-[17px] font-semibold text-fg m-0 truncate">{profile.name}</h3>
-          <p className="text-xs text-fg-mute m-0 mt-0.5 truncate">{subtitle}</p>
+          <p className="text-xs text-fg-mute m-0 mt-0.5 truncate">{lastLine}</p>
+          {count > 0 && (
+            <p className="text-xs text-fg-mute m-0 mt-0.5 truncate">
+              {t('profiles.plansGenerated', { count })}
+            </p>
+          )}
         </div>
       </button>
+      {count > 0 && (
+        <button
+          type="button"
+          onClick={onHistory}
+          aria-label={t('profiles.history.button')}
+          title={t('profiles.history.button')}
+          className="w-10 h-10 min-w-[40px] rounded-full bg-bg-elev border border-amber/[0.15] text-fg-mute hover:text-amber hover:border-amber/30 grid place-items-center flex-shrink-0 transition-colors"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <path d="M3 4v5h5" />
+            <path d="M12 7v5l3 2" />
+          </svg>
+        </button>
+      )}
       <button
         type="button"
         onClick={onDelete}
@@ -296,14 +316,173 @@ function DeleteConfirmModal({
   )
 }
 
+// ── History modal ─────────────────────────────────────────────────────────────
+
+function HistoryModal({
+  profile,
+  locale,
+  onClose,
+  onLoad,
+  onDelete,
+}: {
+  profile: FitProfile
+  locale: string
+  onClose: () => void
+  onLoad: (originalIdx: number) => void
+  onDelete: (originalIdx: number) => void
+}) {
+  const { t } = useTranslation()
+  const count = profile.planHistory.length
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
+
+  useEffect(() => {
+    if (count === 0) onClose()
+  }, [count, onClose])
+
+  // newest-first display, but remember the original index for context calls
+  const indexed: Array<{ entry: PlanHistoryEntry; originalIdx: number }> = profile.planHistory
+    .map((entry, originalIdx) => ({ entry, originalIdx }))
+    .reverse()
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-bg/85 backdrop-blur-lg flex items-stretch sm:items-center justify-center sm:px-6 sm:py-10"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="history-title"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full sm:max-w-[560px] sm:rounded-[22px] bg-bg-card border border-amber/[0.15] flex flex-col max-h-screen sm:max-h-[88vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-amber/[0.15]">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber mb-1.5">
+              {profile.name}
+            </p>
+            <h2 id="history-title" className="text-[24px] font-bold tracking-[-0.02em] text-fg m-0 leading-tight">
+              {t('profiles.history.title')}
+            </h2>
+            <p className="text-xs text-fg-mute m-0 mt-1.5">
+              {t('profiles.plansGenerated', { count })}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 min-w-[40px] rounded-full bg-bg-elev border border-amber/[0.15] text-fg-dim hover:text-fg hover:border-amber/30 grid place-items-center text-lg flex-shrink-0"
+            aria-label={t('profiles.history.close')}
+          >
+            ×
+          </button>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          {indexed.length === 0 ? (
+            <p className="text-fg-mute text-sm text-center py-12">
+              {t('profiles.history.empty')}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {indexed.map(({ entry, originalIdx }) => {
+                const goalLabel = entry.goal
+                  ? t(`onboarding.goal.${entry.goal}`, { defaultValue: t('profiles.history.unknownGoal') })
+                  : t('profiles.history.unknownGoal')
+                const kcal = entry.plan?.ernaehrungsplan?.kalorien_ziel ?? 0
+                return (
+                  <article
+                    key={`${entry.date}-${originalIdx}`}
+                    className="bg-bg-elev rounded-[18px] border border-amber/[0.15] px-4 py-4 flex flex-col gap-3"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber">
+                        {formatDate(entry.date, locale)}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-fg-mute bg-amber/[0.08] border border-amber/[0.15] rounded-full px-2 py-0.5">
+                        {entry.lang.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[15px] font-semibold text-fg leading-tight">
+                        {goalLabel}
+                      </span>
+                      <span className="text-xs text-fg-mute tabular-nums">
+                        {t('profiles.history.kcalDay', {
+                          n: kcal.toLocaleString(locale),
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onLoad(originalIdx)}
+                        className="flex-1 py-2.5 min-h-[40px] rounded-full font-semibold text-[13px] text-[#1a0e00] transition-all hover:-translate-y-px"
+                        style={{
+                          background: 'linear-gradient(180deg, #f0a648 0%, #e8922a 100%)',
+                          boxShadow: '0 0 16px rgba(232,146,42,0.25), inset 0 1px 0 rgba(255,255,255,0.18)',
+                        }}
+                      >
+                        {t('profiles.history.load')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDelete(originalIdx)}
+                        className="px-4 py-2.5 min-h-[40px] rounded-full bg-bg-card border border-amber/[0.15] text-fg-dim hover:text-red-400 hover:border-red-400/40 text-[13px] font-semibold transition-colors"
+                      >
+                        {t('profiles.history.delete')}
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-amber/[0.15] px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] bg-bg-card">
+          <button
+            onClick={onClose}
+            className="w-full py-3.5 min-h-[48px] rounded-2xl bg-bg-elev border border-amber/[0.15] text-fg font-semibold text-sm transition-all hover:border-amber/30"
+          >
+            {t('profiles.history.close')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ProfilesPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { profiles, canCreate, createProfile, selectProfile, deleteProfile } = useProfile()
+  const {
+    profiles,
+    canCreate,
+    createProfile,
+    selectProfile,
+    deleteProfile,
+    activatePlanFromHistory,
+    deletePlanFromHistory,
+  } = useProfile()
   const [showCreate, setShowCreate] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<FitProfile | null>(null)
+  const [historyProfileId, setHistoryProfileId] = useState<string | null>(null)
+  const historyProfile =
+    historyProfileId !== null ? profiles.find((p) => p.id === historyProfileId) ?? null : null
 
   const isDe = i18n.language.startsWith('de')
   const locale = isDe ? 'de-DE' : 'en-US'
@@ -327,6 +506,18 @@ export default function ProfilesPage() {
     if (!pendingDelete) return
     deleteProfile(pendingDelete.id)
     setPendingDelete(null)
+  }
+
+  function handleHistoryLoad(originalIdx: number) {
+    if (!historyProfileId) return
+    activatePlanFromHistory(historyProfileId, originalIdx)
+    setHistoryProfileId(null)
+    navigate('/plan')
+  }
+
+  function handleHistoryDelete(originalIdx: number) {
+    if (!historyProfileId) return
+    deletePlanFromHistory(historyProfileId, originalIdx)
   }
 
   return (
@@ -389,6 +580,7 @@ export default function ProfilesPage() {
               locale={locale}
               onSelect={() => handleSelect(p)}
               onDelete={() => setPendingDelete(p)}
+              onHistory={() => setHistoryProfileId(p.id)}
             />
           ))}
 
@@ -412,6 +604,16 @@ export default function ProfilesPage() {
           profile={pendingDelete}
           onCancel={() => setPendingDelete(null)}
           onConfirm={handleConfirmDelete}
+        />
+      )}
+
+      {historyProfile && (
+        <HistoryModal
+          profile={historyProfile}
+          locale={locale}
+          onClose={() => setHistoryProfileId(null)}
+          onLoad={handleHistoryLoad}
+          onDelete={handleHistoryDelete}
         />
       )}
     </div>
