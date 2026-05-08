@@ -6,7 +6,6 @@ import { useProfile } from '../context/ProfileContext'
 import { exportPDF } from '../utils/exportPDF'
 import type { FitnessPlan, Mahlzeit } from '../services/mistralService'
 import ShoppingListModal from '../components/ShoppingListModal'
-import NotesSection from '../components/NotesSection'
 import TrackerSection from '../components/TrackerSection'
 import DiarySection from '../components/DiarySection'
 import ExerciseWeightLog from '../components/ExerciseWeightLog'
@@ -39,11 +38,11 @@ function StatPill({
   unit?: string
 }) {
   return (
-    <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl px-3 py-3 text-center overflow-hidden">
+    <div className="bg-white/[0.025] border border-white/[0.06] rounded-xl px-3 py-3 text-center overflow-hidden min-w-0">
       <div className="text-[9px] sm:text-[9.5px] font-semibold uppercase tracking-[0.22em] text-fg-mute mb-1.5">
         {label}
       </div>
-      <div className="text-[17px] sm:text-[22px] font-bold tracking-[-0.01em] tabular-nums text-fg leading-tight break-words">
+      <div className="text-[13px] sm:text-[22px] font-bold tracking-[-0.01em] tabular-nums text-fg leading-tight truncate">
         {value}
         {unit && (
           <span className="text-[10px] sm:text-[11px] font-medium text-fg-mute ml-0.5 tracking-[0.04em]">
@@ -52,30 +51,6 @@ function StatPill({
         )}
       </div>
     </div>
-  )
-}
-
-// ── NoteInput ─────────────────────────────────────────────────────────────────
-
-function NoteInput({
-  noteKey,
-  notes,
-  setNotes,
-  placeholder,
-}: {
-  noteKey: string
-  notes: Record<string, string>
-  setNotes: React.Dispatch<React.SetStateAction<Record<string, string>>>
-  placeholder: string
-}) {
-  return (
-    <input
-      type="text"
-      placeholder={placeholder}
-      value={notes[noteKey] ?? ''}
-      onChange={(e) => setNotes((prev) => ({ ...prev, [noteKey]: e.target.value }))}
-      className="w-full bg-transparent border-b border-white/[0.07] text-xs text-fg-dim placeholder:text-fg-mute py-2 focus:outline-none focus:border-amber/60 transition-colors"
-    />
   )
 }
 
@@ -213,13 +188,9 @@ function MacroCard({
 
 function TrainingSection({
   plan,
-  notes,
-  setNotes,
   profileId,
 }: {
   plan: FitnessPlan
-  notes: Record<string, string>
-  setNotes: React.Dispatch<React.SetStateAction<Record<string, string>>>
   profileId: string | undefined
 }) {
   const { t } = useTranslation()
@@ -298,13 +269,6 @@ function TrainingSection({
           {ex.beschreibung && (
             <p className="text-[13px] text-fg-dim leading-relaxed m-0">{ex.beschreibung}</p>
           )}
-
-          <NoteInput
-            noteKey={`note-${dayIdx}-${exIdx}`}
-            notes={notes}
-            setNotes={setNotes}
-            placeholder={t('plan.training.notePlaceholder')}
-          />
 
           {profileId && (
             <ExerciseWeightLog profileId={profileId} exerciseName={ex.name} />
@@ -437,8 +401,8 @@ function SupplementSection({ plan }: { plan: FitnessPlan }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-type Section = 'training' | 'nutrition' | 'supplements' | 'notes' | 'tracker' | 'diary'
-const SECTIONS: Section[] = ['training', 'nutrition', 'supplements', 'notes', 'tracker', 'diary']
+type Section = 'training' | 'nutrition' | 'supplements' | 'tracker' | 'diary'
+const SECTIONS: Section[] = ['training', 'nutrition', 'supplements', 'tracker', 'diary']
 
 export default function PlanPage() {
   const { plan, planLang } = usePlan()
@@ -446,7 +410,6 @@ export default function PlanPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [section, setSection] = useState<Section>('training')
-  const [notes, setNotes] = useState<Record<string, string>>({})
   const [pdfLoading, setPdfLoading] = useState(false)
   const [shoppingOpen, setShoppingOpen] = useState(false)
 
@@ -495,7 +458,7 @@ export default function PlanPage() {
   const trainingDayCount = plan.trainingsplan?.length ?? 0
 
   return (
-    <div className="relative min-h-screen text-fg">
+    <div className="relative min-h-screen text-fg overflow-x-hidden">
       <div className="bg-stage" aria-hidden>
         <div className="blob b1" />
         <div className="blob b2" />
@@ -608,12 +571,7 @@ export default function PlanPage() {
         {/* ── Scrollable content ── */}
         <div className="px-7 mt-4 flex flex-col gap-3">
           {section === 'training' && (
-            <TrainingSection
-              plan={plan}
-              notes={notes}
-              setNotes={setNotes}
-              profileId={activeProfile?.id}
-            />
+            <TrainingSection plan={plan} profileId={activeProfile?.id} />
           )}
           {section === 'nutrition' && (
             <NutritionSection
@@ -623,7 +581,6 @@ export default function PlanPage() {
             />
           )}
           {section === 'supplements' && <SupplementSection plan={plan} />}
-          {section === 'notes' && <NotesSection lang={isDe ? 'de' : 'en'} />}
           {section === 'tracker' && activeProfile && (
             <TrackerSection profileId={activeProfile.id} locale={isDe ? 'de-DE' : 'en-US'} />
           )}
@@ -636,7 +593,7 @@ export default function PlanPage() {
           )}
 
           {/* General tips */}
-          {section !== 'notes' && section !== 'tracker' && section !== 'diary' && (plan.allgemeine_tipps?.length ?? 0) > 0 && (
+          {section !== 'tracker' && section !== 'diary' && (plan.allgemeine_tipps?.length ?? 0) > 0 && (
             <div className="mt-4 bg-bg-card rounded-[22px] border border-amber/[0.15] p-5 flex flex-col gap-3">
               <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-mute m-0">
                 {t('plan.tips')}
@@ -663,14 +620,14 @@ export default function PlanPage() {
       <div className="fixed bottom-0 inset-x-0 z-30 max-w-[720px] mx-auto px-7 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-bg via-bg/95 to-transparent backdrop-blur-md flex gap-3">
         <button
           onClick={() => navigate('/preferences')}
-          className="flex-1 py-4 min-h-[52px] rounded-2xl bg-bg-card border border-amber/[0.15] text-fg font-semibold text-sm transition-all hover:bg-bg-elev hover:border-amber/30"
+          className="flex-1 px-3 py-2 min-h-[40px] sm:px-5 sm:py-4 sm:min-h-[52px] rounded-2xl bg-bg-card border border-amber/[0.15] text-fg font-semibold text-xs sm:text-sm transition-all hover:bg-bg-elev hover:border-amber/30"
         >
           ↻ {t('plan.actions.regenerate')}
         </button>
         <button
           onClick={handleExportPDF}
           disabled={pdfLoading}
-          className="flex-1 py-4 min-h-[52px] rounded-2xl font-semibold text-sm text-[#1a0e00]
+          className="flex-1 px-3 py-2 min-h-[40px] sm:px-5 sm:py-4 sm:min-h-[52px] rounded-2xl font-semibold text-xs sm:text-sm text-[#1a0e00]
             transition-all duration-200 hover:-translate-y-px
             disabled:opacity-70 disabled:cursor-not-allowed disabled:translate-y-0
             flex items-center justify-center gap-2"

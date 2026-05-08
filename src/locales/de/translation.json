@@ -243,7 +243,6 @@
       "training": "Training",
       "nutrition": "Ernährung",
       "supplements": "Supplemente",
-      "notes": "Notizen",
       "tracker": "Tracker",
       "diary": "Tagebuch"
     },
@@ -296,8 +295,7 @@
       "sets": "Sätze",
       "reps": "Wdh.",
       "pause": "Pause",
-      "exercises": "Übungen",
-      "notePlaceholder": "Notiz (z. B. Gewicht: 40 kg)"
+      "exercises": "Übungen"
     },
     "recipe": {
       "steps": "Zubereitung",
@@ -320,15 +318,6 @@
         "spices_sauces": "Gewürze & Saucen",
         "other": "Sonstiges"
       }
-    },
-    "notes": {
-      "title": "Meine Notizen",
-      "intro": "Halte deinen Fortschritt, Gedanken oder Beobachtungen fest.",
-      "placeholder": "Wie lief diese Woche? Notizen, Beobachtungen, Fortschritt …",
-      "add": "Notiz hinzufügen",
-      "empty": "Noch keine Notizen — schreib deine erste!",
-      "delete": "Löschen",
-      "charsLeft": "{{n}} Zeichen übrig"
     },
     "headerBadges": {
       "kcalDay": "kcal / Tag",

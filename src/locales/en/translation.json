@@ -243,7 +243,6 @@
       "training": "Training",
       "nutrition": "Nutrition",
       "supplements": "Supplements",
-      "notes": "Notes",
       "tracker": "Tracker",
       "diary": "Diary"
     },
@@ -296,8 +295,7 @@
       "sets": "Sets",
       "reps": "Reps",
       "pause": "Rest",
-      "exercises": "exercises",
-      "notePlaceholder": "Note (e.g. Weight: 40 kg)"
+      "exercises": "exercises"
     },
     "recipe": {
       "steps": "Steps",
@@ -320,15 +318,6 @@
         "spices_sauces": "Spices & Sauces",
         "other": "Other"
       }
-    },
-    "notes": {
-      "title": "My Notes",
-      "intro": "Capture your progress, thoughts, and observations.",
-      "placeholder": "How did this week go? Notes, observations, progress …",
-      "add": "Add note",
-      "empty": "No notes yet — write your first one!",
-      "delete": "Delete",
-      "charsLeft": "{{n}} characters left"
     },
     "headerBadges": {
       "kcalDay": "kcal / day",
