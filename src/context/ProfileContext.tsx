@@ -14,6 +14,8 @@ import {
   type FitProfile,
 } from '../utils/profileStore'
 import { clearEntries as clearTrackerEntries } from '../utils/trackerStore'
+import { clearLogs as clearExerciseLogs } from '../utils/exerciseLogStore'
+import { clearDiary } from '../utils/diaryStore'
 
 interface ProfileContextValue {
   profiles: FitProfile[]
@@ -96,6 +98,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
       const nextActive =
         activeId === id ? (next[0]?.id ?? null) : activeId
       clearTrackerEntries(id)
+      clearExerciseLogs(id)
+      clearDiary(id)
       writeProfiles(next, nextActive)
     },
     [profiles, activeId, writeProfiles],

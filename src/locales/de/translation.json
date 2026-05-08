@@ -244,7 +244,38 @@
       "nutrition": "Ernährung",
       "supplements": "Supplemente",
       "notes": "Notizen",
-      "tracker": "Tracker"
+      "tracker": "Tracker",
+      "diary": "Tagebuch"
+    },
+    "exerciseLog": {
+      "addToggle": "Gewicht eintragen",
+      "hideToggle": "Schließen",
+      "date": "Datum",
+      "weight": "Gewicht (kg)",
+      "reps": "Wiederholungen",
+      "save": "Speichern",
+      "empty": "Noch keine Einträge",
+      "history": "Letzte Einträge"
+    },
+    "diary": {
+      "title": "Trainings-Tagebuch",
+      "intro": "Halte fest, wie deine Einheiten gelaufen sind.",
+      "date": "Datum",
+      "trainingDay": "Trainingstag",
+      "rating": "Bewertung",
+      "completed": "Plan vollständig durchgeführt?",
+      "completedYes": "Ja",
+      "completedNo": "Nein",
+      "note": "Notiz",
+      "notePlaceholder": "Wie ist es gelaufen? (optional, max. 500 Zeichen)",
+      "charsLeft": "{{n}}/500",
+      "save": "Eintrag speichern",
+      "weekStats": "Trainings diese Woche",
+      "weekStatsCaption": "{{done}} von {{planned}} durchgeführt",
+      "completedTag": "Abgeschlossen",
+      "abortedTag": "Nicht abgeschlossen",
+      "empty": "Noch keine Einträge — leg los!",
+      "delete": "Eintrag löschen"
     },
     "tracker": {
       "title": "Gewicht & Körperfett",

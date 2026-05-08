@@ -8,6 +8,8 @@ import type { FitnessPlan, Mahlzeit } from '../services/mistralService'
 import ShoppingListModal from '../components/ShoppingListModal'
 import NotesSection from '../components/NotesSection'
 import TrackerSection from '../components/TrackerSection'
+import DiarySection from '../components/DiarySection'
+import ExerciseWeightLog from '../components/ExerciseWeightLog'
 
 // First non-whitespace token, capped at 2 chars — turns "Montag" → "Mo",
 // "Donnerstag (Push)" → "Do", "Monday" → "Mo".
@@ -213,10 +215,12 @@ function TrainingSection({
   plan,
   notes,
   setNotes,
+  profileId,
 }: {
   plan: FitnessPlan
   notes: Record<string, string>
   setNotes: React.Dispatch<React.SetStateAction<Record<string, string>>>
+  profileId: string | undefined
 }) {
   const { t } = useTranslation()
   const [dayIdx, setDayIdx] = useState(0)
@@ -301,6 +305,10 @@ function TrainingSection({
             setNotes={setNotes}
             placeholder={t('plan.training.notePlaceholder')}
           />
+
+          {profileId && (
+            <ExerciseWeightLog profileId={profileId} exerciseName={ex.name} />
+          )}
         </article>
       ))}
     </div>
@@ -429,8 +437,8 @@ function SupplementSection({ plan }: { plan: FitnessPlan }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-type Section = 'training' | 'nutrition' | 'supplements' | 'notes' | 'tracker'
-const SECTIONS: Section[] = ['training', 'nutrition', 'supplements', 'notes', 'tracker']
+type Section = 'training' | 'nutrition' | 'supplements' | 'notes' | 'tracker' | 'diary'
+const SECTIONS: Section[] = ['training', 'nutrition', 'supplements', 'notes', 'tracker', 'diary']
 
 export default function PlanPage() {
   const { plan, planLang } = usePlan()
@@ -600,7 +608,12 @@ export default function PlanPage() {
         {/* ── Scrollable content ── */}
         <div className="px-7 mt-4 flex flex-col gap-3">
           {section === 'training' && (
-            <TrainingSection plan={plan} notes={notes} setNotes={setNotes} />
+            <TrainingSection
+              plan={plan}
+              notes={notes}
+              setNotes={setNotes}
+              profileId={activeProfile?.id}
+            />
           )}
           {section === 'nutrition' && (
             <NutritionSection
@@ -614,9 +627,16 @@ export default function PlanPage() {
           {section === 'tracker' && activeProfile && (
             <TrackerSection profileId={activeProfile.id} locale={isDe ? 'de-DE' : 'en-US'} />
           )}
+          {section === 'diary' && activeProfile && (
+            <DiarySection
+              profileId={activeProfile.id}
+              locale={isDe ? 'de-DE' : 'en-US'}
+              trainingDays={plan.trainingsplan}
+            />
+          )}
 
           {/* General tips */}
-          {section !== 'notes' && section !== 'tracker' && (plan.allgemeine_tipps?.length ?? 0) > 0 && (
+          {section !== 'notes' && section !== 'tracker' && section !== 'diary' && (plan.allgemeine_tipps?.length ?? 0) > 0 && (
             <div className="mt-4 bg-bg-card rounded-[22px] border border-amber/[0.15] p-5 flex flex-col gap-3">
               <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-fg-mute m-0">
                 {t('plan.tips')}

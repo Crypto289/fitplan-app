@@ -244,7 +244,38 @@
       "nutrition": "Nutrition",
       "supplements": "Supplements",
       "notes": "Notes",
-      "tracker": "Tracker"
+      "tracker": "Tracker",
+      "diary": "Diary"
+    },
+    "exerciseLog": {
+      "addToggle": "Log weight",
+      "hideToggle": "Close",
+      "date": "Date",
+      "weight": "Weight (kg)",
+      "reps": "Reps",
+      "save": "Save",
+      "empty": "No entries yet",
+      "history": "Recent entries"
+    },
+    "diary": {
+      "title": "Workout diary",
+      "intro": "Capture how your sessions went.",
+      "date": "Date",
+      "trainingDay": "Training day",
+      "rating": "Rating",
+      "completed": "Plan fully completed?",
+      "completedYes": "Yes",
+      "completedNo": "No",
+      "note": "Note",
+      "notePlaceholder": "How did it go? (optional, max 500 chars)",
+      "charsLeft": "{{n}}/500",
+      "save": "Save entry",
+      "weekStats": "Trainings this week",
+      "weekStatsCaption": "{{done}} of {{planned}} completed",
+      "completedTag": "Completed",
+      "abortedTag": "Not completed",
+      "empty": "No entries yet — get started!",
+      "delete": "Delete entry"
     },
     "tracker": {
       "title": "Weight & Body fat",
