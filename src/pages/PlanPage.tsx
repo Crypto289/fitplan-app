@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePlan } from '../context/PlanContext'
@@ -6,6 +6,22 @@ import { exportPDF } from '../utils/exportPDF'
 import type { FitnessPlan, Mahlzeit } from '../services/mistralService'
 import ShoppingListModal from '../components/ShoppingListModal'
 import NotesSection from '../components/NotesSection'
+
+// First non-whitespace token, capped at 2 chars — turns "Montag" → "Mo",
+// "Donnerstag (Push)" → "Do", "Monday" → "Mo".
+function shortDayLabel(tag: string): string {
+  const first = tag.trim().split(/\s+/)[0] ?? tag
+  return first.slice(0, 2)
+}
+
+// "60 Sekunden" → "60 Sek.", "2 Minutes" → "2 Min." (mobile-friendly forms).
+function shortPauseLabel(pause: string): string {
+  return pause
+    .replace(/Sekunden/gi, 'Sek.')
+    .replace(/Seconds/gi, 'Sec.')
+    .replace(/Minuten/gi, 'Min.')
+    .replace(/Minutes/gi, 'Min.')
+}
 
 // ── StatPill ──────────────────────────────────────────────────────────────────
 
@@ -15,7 +31,7 @@ function StatPill({
   unit,
 }: {
   label: string
-  value: string | number
+  value: ReactNode
   unit?: string
 }) {
   return (
@@ -223,7 +239,8 @@ function TrainingSection({
                 : 'border-white/[0.06] bg-white/[0.02] text-fg-dim hover:text-fg'
             }`}
           >
-            {d.tag}
+            <span className="sm:hidden">{shortDayLabel(d.tag)}</span>
+            <span className="hidden sm:inline">{d.tag}</span>
           </button>
         ))}
       </div>
@@ -261,7 +278,15 @@ function TrainingSection({
           <div className="grid grid-cols-3 gap-2">
             <StatPill label={t('plan.training.sets')} value={String(ex.sets)} />
             <StatPill label={t('plan.training.reps')} value={ex.wiederholungen} />
-            <StatPill label={t('plan.training.pause')} value={ex.pause} />
+            <StatPill
+              label={t('plan.training.pause')}
+              value={
+                <>
+                  <span className="sm:hidden">{shortPauseLabel(ex.pause)}</span>
+                  <span className="hidden sm:inline">{ex.pause}</span>
+                </>
+              }
+            />
           </div>
 
           {ex.beschreibung && (
@@ -333,7 +358,8 @@ function NutritionSection({
                 : 'border-white/[0.06] bg-white/[0.02] text-fg-dim hover:text-fg'
             }`}
           >
-            {d.tag}
+            <span className="sm:hidden">{shortDayLabel(d.tag)}</span>
+            <span className="hidden sm:inline">{d.tag}</span>
           </button>
         ))}
       </div>

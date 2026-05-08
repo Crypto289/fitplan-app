@@ -47,6 +47,9 @@ const KEYWORDS: Record<Exclude<IngredientCategory, 'other'>, string[]> = {
     'butter', 'sahne', 'cream',
     'magerquark', 'hüttenkäse', 'cottage cheese', 'quark', 'skyr',
     'eier', 'egg',
+    // Singular "Ei" — use space-padded matching so it does not collide with
+    // "Olivenöl", "Eiweißpulver", or other substrings containing "ei".
+    'ei,', ' ei ',
   ],
   dry_goods: [
     'reis', 'rice', 'pasta', 'nudel', 'noodle', 'spaghetti',
@@ -114,8 +117,15 @@ const KEYWORDS: Record<Exclude<IngredientCategory, 'other'>, string[]> = {
 
 function categorize(rawName: string): IngredientCategory {
   const name = rawName.toLowerCase()
+  const padded = ` ${name} `
   for (const cat of ['meat_fish', 'dairy_eggs', 'dry_goods', 'spices_sauces', 'produce'] as const) {
-    if (KEYWORDS[cat].some((kw) => name.includes(kw))) return cat
+    if (
+      KEYWORDS[cat].some((kw) =>
+        kw.startsWith(' ') || kw.endsWith(' ') ? padded.includes(kw) : name.includes(kw),
+      )
+    ) {
+      return cat
+    }
   }
   return 'other'
 }
