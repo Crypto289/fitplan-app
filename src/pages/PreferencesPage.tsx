@@ -7,7 +7,12 @@ import { useProfile } from '../context/ProfileContext'
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export type Day = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
-type GymType = 'chain' | 'standard' | 'full'
+export type GymMode = 'all' | 'home' | 'custom'
+export type EquipmentId =
+  | 'barbell' | 'dumbbells' | 'cable' | 'latPulldown' | 'legPress'
+  | 'chestPress' | 'shoulderPress' | 'seatedRow' | 'bicepsCurl' | 'tricepsExt'
+  | 'smith' | 'hyperextension' | 'dipStation' | 'pullupBar' | 'abMachine'
+  | 'bodyweight'
 type DietPref = 'everything' | 'vegetarian' | 'vegan' | 'lowcarb' | 'highprotein'
 type Supplement = 'creatine' | 'protein' | 'ashwagandha' | 'shilajit' | 'vitamins' | 'magnesium' | 'none'
 type MealsPerDay = '2' | '3' | '4-5'
@@ -16,7 +21,9 @@ type MealTemperature = 'warm' | 'cold' | 'mixed'
 
 export interface PreferencesData {
   trainingDays: Day[]
-  gymType: GymType | ''
+  gymMode: GymMode
+  homeHasDumbbells: boolean
+  selectedEquipment: EquipmentId[]
   trainingDuration: number
   regionsMode: 'ai' | 'manual'
   trainingRegions: Partial<Record<Day, MuscleGroup[]>>
@@ -30,7 +37,7 @@ export interface PreferencesData {
 
 interface FormErrors {
   trainingDays?: string
-  gymType?: string
+  equipment?: string
   dietPreferences?: string
   mealsPerDay?: string
 }
@@ -38,7 +45,13 @@ interface FormErrors {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const DAYS: Day[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-const GYM_TYPES: GymType[] = ['chain', 'standard', 'full']
+const GYM_MODES: GymMode[] = ['all', 'home', 'custom']
+export const EQUIPMENT_IDS: EquipmentId[] = [
+  'barbell', 'dumbbells', 'cable', 'latPulldown', 'legPress',
+  'chestPress', 'shoulderPress', 'seatedRow', 'bicepsCurl', 'tricepsExt',
+  'smith', 'hyperextension', 'dipStation', 'pullupBar', 'abMachine',
+  'bodyweight',
+]
 const DIET_PREFS: DietPref[] = ['everything', 'vegetarian', 'vegan', 'lowcarb', 'highprotein']
 const SUPPLEMENTS: Supplement[] = ['creatine', 'protein', 'ashwagandha', 'shilajit', 'vitamins', 'magnesium', 'none']
 const MEALS: MealsPerDay[] = ['2', '3', '4-5']
@@ -47,7 +60,9 @@ const MUSCLES: MuscleGroup[] = ['chest', 'back', 'shoulders', 'arms', 'legs', 'c
 
 const INITIAL: PreferencesData = {
   trainingDays: [],
-  gymType: '',
+  gymMode: 'all',
+  homeHasDumbbells: false,
+  selectedEquipment: [],
   trainingDuration: 60,
   regionsMode: 'ai',
   trainingRegions: {},
@@ -59,10 +74,25 @@ const INITIAL: PreferencesData = {
   mealTemperature: 'mixed',
 }
 
+// Backwards-compat: old persisted preferencesData carried `gymType` and lacked
+// the new mode/equipment fields. Default missing keys to a safe baseline.
+function normalizePrefs(p: PreferencesData | undefined): PreferencesData {
+  if (!p) return INITIAL
+  return {
+    ...INITIAL,
+    ...p,
+    gymMode: p.gymMode ?? 'all',
+    homeHasDumbbells: p.homeHasDumbbells ?? false,
+    selectedEquipment: p.selectedEquipment ?? [],
+  }
+}
+
 function validate(data: PreferencesData, t: (k: string) => string): FormErrors {
   const errors: FormErrors = {}
   if (data.trainingDays.length < 2) errors.trainingDays = t('preferences.errors.trainingDaysMin')
-  if (!data.gymType) errors.gymType = t('preferences.errors.required')
+  if (data.gymMode === 'custom' && data.selectedEquipment.length === 0) {
+    errors.equipment = t('preferences.errors.equipmentRequired')
+  }
   if (data.dietPreferences.length === 0) errors.dietPreferences = t('preferences.errors.dietRequired')
   if (!data.mealsPerDay) errors.mealsPerDay = t('preferences.errors.required')
   return errors
@@ -188,7 +218,7 @@ export default function PreferencesPage() {
     updateActivePreferencesData,
     appendPlanToHistory,
   } = useProfile()
-  const [form, setForm] = useState<PreferencesData>(activeProfile?.preferencesData ?? INITIAL)
+  const [form, setForm] = useState<PreferencesData>(normalizePrefs(activeProfile?.preferencesData))
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -248,6 +278,19 @@ export default function PreferencesPage() {
       nextDay = without.includes(m) ? without.filter((x) => x !== m) : [...without, m]
     }
     patch('trainingRegions', { ...form.trainingRegions, [day]: nextDay })
+  }
+
+  function setGymMode(mode: GymMode) {
+    const next: PreferencesData = { ...form, gymMode: mode }
+    setForm(next)
+    if (submitted) setErrors(validate(next, t))
+  }
+
+  function toggleEquipment(id: EquipmentId) {
+    const next = form.selectedEquipment.includes(id)
+      ? form.selectedEquipment.filter((e) => e !== id)
+      : [...form.selectedEquipment, id]
+    patch('selectedEquipment', next)
   }
 
   function toggleSupplement(s: Supplement) {
@@ -377,50 +420,58 @@ export default function PreferencesPage() {
               </div>
             </Field>
 
-            {/* Fitnessstudio-Typ */}
-            <Field label={t('preferences.fields.gymType')} error={errors.gymType}>
-              <div className="flex flex-col gap-2.5">
-                {GYM_TYPES.map((g) => {
-                  const active = form.gymType === g
+            {/* Verfügbare Geräte */}
+            <Field label={t('preferences.fields.gymType')} error={errors.equipment}>
+              <div className="flex gap-2">
+                {GYM_MODES.map((mode) => {
+                  const active = form.gymMode === mode
                   return (
-                    <label
-                      key={g}
-                      className={`flex items-start gap-3.5 px-4 py-4 rounded-2xl border cursor-pointer transition-all ${
-                        active
-                          ? 'border-amber bg-amber/[0.15]'
-                          : errors.gymType
-                          ? 'border-red-500/30 bg-red-950/15 hover:border-red-400/40'
-                          : 'border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]'
-                      }`}
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setGymMode(mode)}
+                      className={`flex-1 min-h-[44px] py-3 rounded-full border text-sm font-semibold transition-all select-none ${pillCls(active)}`}
                     >
-                      <span
-                        className={`w-[18px] h-[18px] rounded-full border-2 flex-shrink-0 mt-0.5 grid place-items-center transition-all ${
-                          active ? 'border-amber' : 'border-white/20'
-                        }`}
-                        style={active ? { boxShadow: '0 0 10px rgba(232,146,42,0.55)' } : undefined}
-                      >
-                        {active && <span className="block w-2 h-2 rounded-full bg-amber" />}
-                      </span>
-                      <span className="flex flex-col gap-0.5">
-                        <span className="text-[15px] font-semibold text-fg">
-                          {t(`preferences.gymType.${g}`)}
-                        </span>
-                        <span className="text-[12.5px] text-fg-mute leading-snug">
-                          {t(`preferences.gymType.${g}Sub`)}
-                        </span>
-                      </span>
-                      <input
-                        type="radio"
-                        name="gymType"
-                        value={g}
-                        checked={active}
-                        onChange={() => patch('gymType', g)}
-                        className="sr-only"
-                      />
-                    </label>
+                      {t(`preferences.gymMode.${mode}`)}
+                    </button>
                   )
                 })}
               </div>
+              <p className="text-xs text-fg-mute leading-relaxed mt-2">
+                {t(`preferences.gymMode.${form.gymMode}Hint`)}
+              </p>
+
+              {form.gymMode === 'home' && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => patch('homeHasDumbbells', !form.homeHasDumbbells)}
+                    className={`inline-flex items-center gap-2 px-4 min-h-[40px] py-2.5 rounded-full border text-[13px] transition-all select-none ${pillCls(form.homeHasDumbbells)}`}
+                  >
+                    {form.homeHasDumbbells && <span className="text-[10px]">✓</span>}
+                    {t('preferences.homeDumbbells')}
+                  </button>
+                </div>
+              )}
+
+              {form.gymMode === 'custom' && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {EQUIPMENT_IDS.map((id) => {
+                    const active = form.selectedEquipment.includes(id)
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => toggleEquipment(id)}
+                        className={`inline-flex items-center gap-2 px-4 min-h-[40px] py-2.5 rounded-full border text-[13px] transition-all select-none ${pillCls(active, !!errors.equipment)}`}
+                      >
+                        {active && <span className="text-[10px]">✓</span>}
+                        {t(`preferences.equipment.${id}`)}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </Field>
 
             <SliderField

@@ -1,5 +1,5 @@
 import type { ProfileData } from '../pages/OnboardingPage'
-import type { PreferencesData } from '../pages/PreferencesPage'
+import type { PreferencesData, EquipmentId } from '../pages/PreferencesPage'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -100,10 +100,49 @@ const OCCUPATION = {
   en: { desk: 'Desk job (low activity)', standing: 'Trade / Standing (moderate)', heavy: 'Physically demanding (very active)' },
 } as const
 
-const GYM = {
-  de: { chain: 'McFit / Kette (nur Geräte)', standard: 'Standard (Geräte + Freihantel)', full: 'Voll ausgestattet' },
-  en: { chain: 'Chain gym (machines only)', standard: 'Standard (machines + free weights)', full: 'Fully equipped' },
-} as const
+const EQUIPMENT_LABELS: Record<'de' | 'en', Record<EquipmentId, string>> = {
+  de: {
+    barbell: 'Langhantel', dumbbells: 'Kurzhanteln', cable: 'Kabelzug',
+    latPulldown: 'Latzugmaschine', legPress: 'Beinpresse',
+    chestPress: 'Brustpresse (Maschine)', shoulderPress: 'Schulterdrückmaschine',
+    seatedRow: 'Rudermaschine (Kabel)', bicepsCurl: 'Bizepsmaschine',
+    tricepsExt: 'Trizepsmaschine', smith: 'Smith Machine',
+    hyperextension: 'Hyperextension', dipStation: 'Dipstation',
+    pullupBar: 'Klimmzugstange', abMachine: 'Bauchtrainer',
+    bodyweight: 'Körpergewicht',
+  },
+  en: {
+    barbell: 'Barbell', dumbbells: 'Dumbbells', cable: 'Cable Machine',
+    latPulldown: 'Lat Pulldown', legPress: 'Leg Press',
+    chestPress: 'Chest Press (Machine)', shoulderPress: 'Shoulder Press Machine',
+    seatedRow: 'Seated Row (Cable)', bicepsCurl: 'Biceps Curl Machine',
+    tricepsExt: 'Triceps Extension Machine', smith: 'Smith Machine',
+    hyperextension: 'Hyperextension', dipStation: 'Dip Station',
+    pullupBar: 'Pull-up Bar', abMachine: 'Ab Machine',
+    bodyweight: 'Bodyweight',
+  },
+}
+
+function buildEquipmentLine(p: PreferencesData, lang: 'de' | 'en'): string {
+  const head = lang === 'de' ? 'Verfügbare Geräte' : 'Available equipment'
+  if (p.gymMode === 'all') {
+    return lang === 'de'
+      ? `${head}: Alle Geräte eines vollausgestatteten Fitnessstudios`
+      : `${head}: All equipment of a fully equipped gym`
+  }
+  if (p.gymMode === 'home') {
+    if (p.homeHasDumbbells) {
+      return lang === 'de'
+        ? `${head}: Körpergewicht + Kurzhanteln`
+        : `${head}: Bodyweight + dumbbells`
+    }
+    return lang === 'de'
+      ? `${head}: Nur Körpergewicht (Liegestütze, Klimmzüge, Dips, Planks etc.)`
+      : `${head}: Bodyweight only (push-ups, pull-ups, dips, planks, etc.)`
+  }
+  const ids: EquipmentId[] = p.selectedEquipment.length ? p.selectedEquipment : ['bodyweight']
+  return `${head}: ${ids.map((id) => EQUIPMENT_LABELS[lang][id]).join(', ')}`
+}
 
 const DAY_SHORT = {
   de: { mon: 'Mo', tue: 'Di', wed: 'Mi', thu: 'Do', fri: 'Fr', sat: 'Sa', sun: 'So' },
@@ -231,7 +270,7 @@ ZUBEREITUNG (PFLICHT):
 - Verletzungen / Einschränkungen bei der Übungsauswahl strikt berücksichtigen
 - Allergien und Unverträglichkeiten in keiner Mahlzeit verwenden
 - Unbeliebte Zutaten DÜRFEN NIRGENDWO vorkommen — auch nicht als Nebenbestandteil oder Beilage
-- Nur Geräte/Übungen aus dem gewählten Fitnessstudio-Typ
+- Verwende NUR Übungen, die mit den im Nutzer-Prompt gelisteten Geräten möglich sind. VERBOTEN: Übungen für nicht vorhandene Geräte.
 - Wochenbudget einhalten — Zutaten müssen realistisch im Budget liegen
 - Essenspräferenz strikt einhalten
 - Wenn Trainingsregionen pro Tag vorgegeben sind: Übungen MÜSSEN exakt diese Muskelgruppen treffen
@@ -312,7 +351,7 @@ EXERCISE NAMES:
 - Strictly account for injuries / limitations when selecting exercises
 - Never use allergens / intolerances in any meal
 - Disliked ingredients MUST NOT appear ANYWHERE — not even as a side or minor component
-- Only equipment/exercises from the selected gym type
+- Use ONLY exercises that are possible with the equipment listed in the user prompt. FORBIDDEN: exercises for equipment that is not present.
 - Respect the weekly budget — ingredients must fit realistically
 - Strictly follow dietary preferences
 - If training regions per day are specified: exercises MUST match exactly those muscle groups
@@ -367,7 +406,7 @@ function buildUserPrompt(
   const genderLabel = GENDER[L][profile.gender as keyof (typeof GENDER)[typeof L]] ?? profile.gender
   const expLabel = EXPERIENCE[L][profile.experience as keyof (typeof EXPERIENCE)[typeof L]] ?? profile.experience
   const occLabel = OCCUPATION[L][profile.occupation as keyof (typeof OCCUPATION)[typeof L]] ?? profile.occupation
-  const gymLabel = GYM[L][preferences.gymType as keyof (typeof GYM)[typeof L]] ?? preferences.gymType
+  const equipmentLine = buildEquipmentLine(preferences, L)
   const goalLabel = GOAL[L][profile.goal as keyof (typeof GOAL)[typeof L]] ?? profile.goal
 
   const regionsLine = (() => {
@@ -411,7 +450,7 @@ function buildUserPrompt(
       '',
       '=== TRAINING ===',
       `Trainingstage: ${dayLabels} (${preferences.trainingDays.length}× pro Woche)`,
-      `Fitnessstudio-Typ: ${gymLabel}`,
+      equipmentLine,
       `Trainingszeit pro Einheit: ${preferences.trainingDuration} Minuten`,
       regionsLine,
       '',
@@ -434,7 +473,7 @@ function buildUserPrompt(
         : 'Keine Supplemente',
       '',
       '=== AUFGABE ===',
-      `1. Trainingsplan für alle ${preferences.trainingDays.length} Trainingstage (passende Übungen für: ${gymLabel})`,
+      `1. Trainingsplan für alle ${preferences.trainingDays.length} Trainingstage (passende Übungen NUR für die oben gelisteten Geräte)`,
       `2. Vollständiger 7-Tage-Ernährungsplan mit "mahlzeiten"-Array (${preferences.mealsPerDay} Einträge pro Tag)`,
       preferences.supplements.filter((s) => s !== 'none').length > 0
         ? '3. Supplement-Timing nur für die angegebenen Supplemente'
@@ -482,7 +521,7 @@ function buildUserPrompt(
       '',
       '=== TRAINING ===',
       `Training days: ${dayLabels} (${preferences.trainingDays.length}× per week)`,
-      `Gym type: ${gymLabel}`,
+      equipmentLine,
       `Session duration: ${preferences.trainingDuration} minutes`,
       regionsLine,
       '',
@@ -505,7 +544,7 @@ function buildUserPrompt(
         : 'No supplements',
       '',
       '=== TASK ===',
-      `1. Training plan for all ${preferences.trainingDays.length} training days (exercises suitable for: ${gymLabel})`,
+      `1. Training plan for all ${preferences.trainingDays.length} training days (exercises ONLY for the equipment listed above)`,
       `2. Complete 7-day nutrition plan with "mahlzeiten" array (${preferences.mealsPerDay} entries per day)`,
       preferences.supplements.filter((s) => s !== 'none').length > 0
         ? '3. Supplement timing for listed supplements only'

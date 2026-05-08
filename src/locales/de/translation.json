@@ -114,7 +114,7 @@
     },
     "fields": {
       "trainingDays": "Trainingstage",
-      "gymType": "Fitnessstudio-Typ",
+      "gymType": "Verfügbare Geräte",
       "trainingDuration": "Trainingszeit pro Einheit",
       "trainingRegions": "Trainingsregionen pro Tag",
       "nutritionBudget": "Ernährungsbudget",
@@ -158,13 +158,32 @@
       "sat": "Sa",
       "sun": "So"
     },
-    "gymType": {
-      "chain": "McFit / Kette",
-      "chainSub": "Nur Geräte",
-      "standard": "Standard",
-      "standardSub": "Geräte + Freihantel",
-      "full": "Voll ausgestattet",
-      "fullSub": "Alles vorhanden"
+    "gymMode": {
+      "all": "Alles verfügbar",
+      "allHint": "Vollausgestattetes Fitnessstudio",
+      "home": "Home Workout",
+      "homeHint": "Körpergewicht-Übungen",
+      "custom": "Geräte auswählen",
+      "customHint": "Eigene Geräteliste"
+    },
+    "homeDumbbells": "Kurzhanteln vorhanden",
+    "equipment": {
+      "barbell": "Langhantel",
+      "dumbbells": "Kurzhanteln",
+      "cable": "Kabelzug",
+      "latPulldown": "Latzugmaschine",
+      "legPress": "Beinpresse",
+      "chestPress": "Brustpresse (Maschine)",
+      "shoulderPress": "Schulterdrückmaschine",
+      "seatedRow": "Rudermaschine (Kabel)",
+      "bicepsCurl": "Bizepsmaschine",
+      "tricepsExt": "Trizepsmaschine",
+      "smith": "Smith Machine",
+      "hyperextension": "Hyperextension",
+      "dipStation": "Dipstation",
+      "pullupBar": "Klimmzugstange",
+      "abMachine": "Bauchtrainer",
+      "bodyweight": "Körpergewicht"
     },
     "diet": {
       "everything": "Alles",
@@ -195,6 +214,7 @@
       "required": "Pflichtfeld",
       "trainingDaysMin": "Mindestens 2 Tage wählen",
       "dietRequired": "Mindestens eine Option wählen",
+      "equipmentRequired": "Mindestens ein Gerät auswählen",
       "unknown": "Unbekannter Fehler. Bitte erneut versuchen."
     }
   },

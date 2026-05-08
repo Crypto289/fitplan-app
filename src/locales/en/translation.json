@@ -114,7 +114,7 @@
     },
     "fields": {
       "trainingDays": "Training Days",
-      "gymType": "Gym Type",
+      "gymType": "Available Equipment",
       "trainingDuration": "Session Duration",
       "trainingRegions": "Training Regions per Day",
       "nutritionBudget": "Nutrition Budget",
@@ -158,13 +158,32 @@
       "sat": "Sat",
       "sun": "Sun"
     },
-    "gymType": {
-      "chain": "Chain Gym",
-      "chainSub": "Machines only",
-      "standard": "Standard",
-      "standardSub": "Machines + free weights",
-      "full": "Fully equipped",
-      "fullSub": "Everything available"
+    "gymMode": {
+      "all": "Everything available",
+      "allHint": "Fully equipped gym",
+      "home": "Home workout",
+      "homeHint": "Bodyweight exercises",
+      "custom": "Choose equipment",
+      "customHint": "Your own equipment list"
+    },
+    "homeDumbbells": "Dumbbells available",
+    "equipment": {
+      "barbell": "Barbell",
+      "dumbbells": "Dumbbells",
+      "cable": "Cable Machine",
+      "latPulldown": "Lat Pulldown",
+      "legPress": "Leg Press",
+      "chestPress": "Chest Press (Machine)",
+      "shoulderPress": "Shoulder Press Machine",
+      "seatedRow": "Seated Row (Cable)",
+      "bicepsCurl": "Biceps Curl Machine",
+      "tricepsExt": "Triceps Extension Machine",
+      "smith": "Smith Machine",
+      "hyperextension": "Hyperextension",
+      "dipStation": "Dip Station",
+      "pullupBar": "Pull-up Bar",
+      "abMachine": "Ab Machine",
+      "bodyweight": "Bodyweight"
     },
     "diet": {
       "everything": "Everything",
@@ -195,6 +214,7 @@
       "required": "Required field",
       "trainingDaysMin": "Select at least 2 days",
       "dietRequired": "Select at least one option",
+      "equipmentRequired": "Select at least one piece of equipment",
       "unknown": "Unknown error. Please try again."
     }
   },
